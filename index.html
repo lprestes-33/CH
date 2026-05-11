@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala CH — HBM/SM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#141e14;--panel:#1c2e1c;--card:#213021;--border:rgba(180,150,60,.22);
+  --gold:#c9a84c;--gold2:#e8c96a;--khaki:#8a7a5a;--paper:#f0ead8;
+  --green:#2d4a2d;--danger:#8b2020;--ok:#4a9a5a;--info:#2a5080;
+  --exp:#1a4a2a;--sv:#1a2a4a;--sav:#3a2a10;--cch:#2a1a3a;--paec:#1a3a3a;--via:#3a1a1a;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Barlow',sans-serif;background:var(--bg);color:var(--paper);font-size:13px}
+body{display:grid;grid-template-rows:auto 1fr;grid-template-columns:278px 1fr;overflow:hidden}
+
+header{grid-column:1/-1;background:var(--green);border-bottom:3px solid var(--gold);
+  padding:11px 18px;display:flex;align-items:center;gap:12px}
+.shield{width:40px;height:48px;background:var(--gold);flex-shrink:0;
+  clip-path:polygon(50% 0%,100% 18%,100% 72%,50% 100%,0% 72%,0% 18%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:var(--bg)}
+header h1{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;
+  letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+header p{font-size:10px;color:var(--khaki);letter-spacing:.8px}
+.hdr{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+
+aside{background:rgba(0,0,0,.32);border-right:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column}
+main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+
+.sec{border-bottom:1px solid var(--border)}
+.sec-hd{padding:9px 13px;font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:6px;cursor:pointer;
+  background:rgba(201,168,76,.05);transition:background .15s;user-select:none}
+.sec-hd:hover{background:rgba(201,168,76,.11)}
+.sec-arr{margin-left:auto;transition:transform .2s;font-size:10px}
+.sec-hd.open .sec-arr{transform:rotate(180deg)}
+.sec-body{padding:11px 13px;display:flex;flex-direction:column;gap:7px}
+.sec-body.hidden{display:none}
+
+label{font-size:10px;letter-spacing:.5px;color:var(--khaki);display:block;margin-bottom:3px;text-transform:uppercase}
+input,select{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(180,150,60,.3);
+  border-radius:3px;color:var(--paper);font-family:'Barlow',sans-serif;font-size:12px;
+  padding:6px 8px;transition:border-color .15s}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+select option{background:#1c2e1c}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:5px;
+  background:var(--gold);color:var(--bg);border:none;border-radius:3px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;padding:7px 11px;cursor:pointer;
+  transition:background .15s,transform .1s;width:100%}
+.btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn:active{transform:none}
+.btn-o{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+.btn-o:hover{background:rgba(201,168,76,.1)}
+.btn-g{background:linear-gradient(135deg,#1a6a3a,#28a050);color:#fff;border:1px solid #3acc60}
+.btn-g:hover{background:linear-gradient(135deg,#208044,#30b85a)}
+.btn-r{background:var(--danger);color:#fff}
+.btn-r:hover{background:#a02828}
+.btn-b{background:linear-gradient(135deg,#1a3a6a,#2860b0);color:#fff;border:1px solid #3a6acc}
+.btn-b:hover{background:linear-gradient(135deg,#1e4480,#3070c8)}
+.btn-sm{width:auto;font-size:11px;padding:6px 12px}
+
+/* save indicator */
+.save-dot{width:7px;height:7px;border-radius:50%;background:#5ec878;flex-shrink:0;
+  transition:background .3s;box-shadow:0 0 6px rgba(94,200,120,.5)}
+.save-dot.dirty{background:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.5)}
+
+.mc{border:1px solid var(--border);border-radius:3px;margin-bottom:5px;cursor:pointer;
+  transition:border-color .15s,background .15s;overflow:hidden}
+.mc:hover{border-color:var(--gold)}
+.mc.active{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.mc-hd{padding:7px 9px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.mc-name{font-weight:600;font-size:11px;line-height:1.2}
+.mc-posto{font-size:9px;color:var(--khaki);margin-top:1px}
+.mc-ch{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-align:right}
+.mc-alvo{font-size:9px;color:var(--khaki)}
+.mc-del{color:var(--danger);cursor:pointer;font-size:15px;padding:1px 4px;
+  border-radius:2px;line-height:1;flex-shrink:0}
+.mc-del:hover{background:rgba(139,32,32,.2)}
+.mc-bar{height:3px;background:rgba(255,255,255,.06);margin:0 9px 6px}
+.mc-bar-fill{height:100%;border-radius:2px;transition:width .4s}
+.ok{color:#5ec878}.warn{color:var(--gold)}.ov-c{color:#e05050}
+
+/* tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.tab{padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;
+  color:var(--khaki);white-space:nowrap;transition:color .15s,border-color .15s;user-select:none}
+.tab:hover{color:var(--paper)}.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+/* tab "visão geral" especial */
+.tab-overview{border-left:1px solid var(--border);margin-left:auto}
+
+/* ch bar */
+.ch-bar{display:flex;gap:14px;flex-wrap:wrap;padding:7px 16px;
+  background:rgba(0,0,0,.2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.ch-item{display:flex;flex-direction:column;gap:0;cursor:pointer;padding:3px 6px;border-radius:3px;
+  border:1px solid transparent;transition:border-color .15s}
+.ch-item:hover{border-color:var(--border)}
+.ch-item.ch-active{border-color:var(--gold);background:rgba(201,168,76,.06)}
+.ch-nome{font-size:9px;color:var(--khaki);letter-spacing:.4px}
+.ch-val{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700}
+.ch-alvo2{font-size:9px;color:var(--khaki)}
+
+/* calendário */
+.cal-wrap{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.cal-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex-shrink:0;
+  display:flex;align-items:center;gap:10px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.weekday-hd{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:2px}
+.wdh{text-align:center;font-size:9px;letter-spacing:.8px;color:var(--khaki);padding:3px 0;text-transform:uppercase}
+.wdh.we{color:#c07070}
+
+.day{border:1px solid var(--border);border-radius:4px;background:var(--card);
+  cursor:pointer;min-height:80px;transition:border-color .15s,background .15s;overflow:hidden}
+.day:hover{border-color:rgba(201,168,76,.55);background:rgba(33,48,33,.9)}
+.day.we{background:rgba(10,14,10,.5)}
+.day.has{border-color:rgba(201,168,76,.38)}
+.day.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none}
+.day.today{border-color:rgba(94,200,120,.5);box-shadow:0 0 8px rgba(94,200,120,.15)}
+.day-hd{padding:4px 6px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.d-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700}
+.d-wk{font-size:8px;letter-spacing:.8px;color:var(--khaki);text-transform:uppercase}
+.day.we .d-num{color:#e8a0a0}.day.we .d-wk{color:#a06060}
+.day.today .d-num{color:#7ee8a0}
+.day-body{padding:4px 6px;display:flex;flex-direction:column;gap:2px}
+.dtag{font-size:9px;border-radius:2px;padding:1px 4px;font-weight:600;
+  display:flex;justify-content:space-between;align-items:center;white-space:nowrap}
+.te{background:rgba(26,74,42,.85);color:#7ee8a0}
+.ts{background:rgba(26,42,74,.85);color:#7ab0e8}
+.tv{background:rgba(58,42,16,.85);color:#e8c87a}
+.tc{background:rgba(42,26,58,.85);color:#c07ae8}
+.tp{background:rgba(26,58,58,.85);color:#7ae8e8}
+.tvia{background:rgba(58,26,26,.85);color:#e87a7a}
+.tcod{background:rgba(55,55,55,.6);color:#bbb;font-style:italic}
+
+/* ── VISÃO GERAL ── */
+.overview-wrap{flex:1;overflow-y:auto;padding:14px 16px}
+.ov-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
+  letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+.ov-table{width:100%;border-collapse:collapse;font-size:11px}
+.ov-table th{padding:6px 10px;text-align:left;font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--khaki);
+  border-bottom:1px solid var(--border);white-space:nowrap}
+.ov-table td{padding:5px 10px;border-bottom:1px solid rgba(180,150,60,.08);vertical-align:middle}
+.ov-table tr:hover td{background:rgba(201,168,76,.04)}
+.ov-mil-name{font-weight:600;font-size:12px}
+.ov-mil-posto{font-size:10px;color:var(--khaki)}
+.ov-mes-cell{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700}
+.ov-mes-cell .sub{font-size:9px;font-family:'Barlow',sans-serif;font-weight:400;color:var(--khaki);display:block}
+.ov-badge{display:inline-flex;align-items:center;justify-content:center;
+  min-width:48px;padding:2px 6px;border-radius:3px;font-size:12px;font-weight:700;
+  font-family:'Barlow Condensed',sans-serif}
+.badge-ok{background:rgba(74,154,90,.2);color:#5ec878;border:1px solid rgba(74,154,90,.3)}
+.badge-warn{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
+.badge-low{background:rgba(139,32,32,.2);color:#e05050;border:1px solid rgba(139,32,32,.3)}
+.badge-empty{color:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.07);min-width:48px;text-align:center}
+.ov-total-row td{border-top:1px solid var(--border);font-weight:600;background:rgba(201,168,76,.04)}
+
+/* overlay/modal */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;
+  justify-content:center;z-index:100;backdrop-filter:blur(3px)}
+.ov.hidden{display:none}
+.modal{background:var(--panel);border:1px solid var(--gold);border-radius:6px;
+  padding:20px;width:360px;max-width:96vw;display:flex;flex-direction:column;gap:12px;
+  max-height:96vh;overflow-y:auto}
+.modal h2{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;
+  letter-spacing:2px;color:var(--gold)}
+.modal-sub{font-size:10px;color:var(--khaki);margin-top:-6px}
+
+.tipo-row{display:flex;gap:4px;flex-wrap:wrap}
+.tbtn{padding:4px 9px;border-radius:3px;font-size:10px;font-weight:700;
+  cursor:pointer;border:1px solid transparent;transition:opacity .15s;opacity:.35}
+.tbtn.sel{opacity:1}
+.tb-exp{background:var(--exp);color:#7ee8a0;border-color:#3a7a5a}
+.tb-sv {background:var(--sv);color:#7ab0e8;border-color:#3a5a8a}
+.tb-sav{background:var(--sav);color:#e8c87a;border-color:#8a6a2a}
+.tb-cch{background:var(--cch);color:#c07ae8;border-color:#6a3a8a}
+.tb-paec{background:var(--paec);color:#7ae8e8;border-color:#2a7a7a}
+.tb-via{background:var(--via);color:#e87a7a;border-color:#8a3a3a}
+.tb-cod{background:rgba(55,55,55,.7);color:#ccc;border-color:#555}
+
+.campo{display:flex;flex-direction:column;gap:4px}
+.campo-hint{font-size:10px;color:var(--khaki);margin-top:1px}
+.mbtns{display:flex;gap:7px;margin-top:2px}
+.mbtns .btn{padding:8px 14px;font-size:11px}
+
+/* modal militar */
+.modal-mil{width:400px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* modal histórico */
+.modal-hist{width:500px}
+.hist-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
+.hist-table th{padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--khaki);
+  border-bottom:1px solid var(--border)}
+.hist-table td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.hist-table tr:hover td{background:rgba(201,168,76,.04)}
+
+/* empty */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:10px;color:var(--khaki);font-family:'Barlow Condensed',sans-serif;
+  font-size:15px;letter-spacing:2px;text-transform:uppercase;opacity:.55;text-align:center}
+
+/* toast */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--green);
+  border:1px solid var(--gold);color:var(--paper);padding:9px 14px;
+  border-radius:4px;font-size:12px;font-weight:600;z-index:300;
+  transform:translateY(55px);opacity:0;transition:transform .22s,opacity .22s;pointer-events:none}
+.toast.show{transform:none;opacity:1}
+.toast.ok{border-color:#5ec878;color:#5ec878}
+.toast.err{border-color:#e05050;color:#e05050}
+
+/* quick fill */
+.qfill-row{display:flex;gap:4px;flex-wrap:wrap}
+.qfbtn{padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;
+  background:rgba(201,168,76,.08);border:1px solid var(--border);color:var(--khaki);
+  transition:all .15s;font-family:'Barlow',sans-serif}
+.qfbtn:hover{background:rgba(201,168,76,.18);color:var(--paper);border-color:var(--gold)}
+
+@media(max-width:760px){
+  body{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
+  aside{max-height:180px;overflow-x:auto}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="shield">BM</div>
+  <div>
+    <h1>Escala CH — HBM/SM</h1>
+    <p id="hd-sub">Hospital Cel. Izidro · SACM · Selecione o mês e gere o calendário</p>
+  </div>
+  <div class="hdr">
+    <div class="save-dot" id="save-dot" title="Dados salvos automaticamente"></div>
+    <button class="btn btn-o btn-sm" onclick="openMilModal()">+ Militar</button>
+    <button class="btn btn-b btn-sm" onclick="showOverview()">📊 Geral</button>
+    <button class="btn btn-o btn-sm" onclick="exportJSON()">💾 Backup</button>
+    <button class="btn btn-o btn-sm" onclick="document.getElementById('import-input').click()">📂 Importar</button>
+    <button class="btn btn-g btn-sm" onclick="exportExcel()">⬇ Excel</button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(this)">
+  </div>
+</header>
+
+<aside>
+  <div class="sec">
+    <div class="sec-hd open" onclick="toggleSec(this)">📅 Período <span class="sec-arr">▾</span></div>
+    <div class="sec-body">
+      <div class="r2">
+        <div><label>Mês</label>
+          <select id="sel-mes">
+            <option value="0">Jan</option><option value="1">Fev</option>
+            <option value="2">Mar</option><option value="3">Abr</option>
+            <option value="4" selected>Mai</option><option value="5">Jun</option>
+            <option value="6">Jul</option><option value="7">Ago</option>
+            <option value="8">Set</option><option value="9">Out</option>
+            <option value="10">Nov</option><option value="11">Dez</option>
+          </select>
+        </div>
+        <div><label>Ano</label>
+          <input type="number" id="sel-ano" value="2026" min="2020" max="2040">
+        </div>
+      </div>
+      <button class="btn" onclick="buildCal()">▶ Gerar Calendário</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd open" onclick="toggleSec(this)">👤 Militares <span class="sec-arr">▾</span></div>
+    <div class="sec-body">
+      <div id="mil-list"></div>
+      <button class="btn btn-o" onclick="openMilModal()">+ Adicionar</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd" onclick="toggleSec(this)">⚡ Preencher Rápido <span class="sec-arr">▾</span></div>
+    <div class="sec-body hidden">
+      <p style="font-size:10px;color:var(--khaki);line-height:1.5">Aplica o mesmo tipo em todos os dias úteis do mês para o militar selecionado.</p>
+      <div class="r2">
+        <div>
+          <label>Tipo</label>
+          <select id="qf-tipo">
+            <option value="exp">Expediente</option>
+            <option value="sv">Serviço</option>
+            <option value="cch">CCH</option>
+          </select>
+        </div>
+        <div>
+          <label>Horas</label>
+          <input type="number" id="qf-horas" value="6" min="1" max="24" step="0.5">
+        </div>
+      </div>
+      <button class="btn btn-o" onclick="quickFillMes()">⚡ Preencher Dias Úteis</button>
+      <button class="btn btn-r" style="font-size:10px;padding:5px" onclick="clearMes()">🗑 Limpar Mês Inteiro</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd" onclick="toggleSec(this)">⏱ Horários <span class="sec-arr">▾</span></div>
+    <div class="sec-body hidden">
+      <div><label>Expediente</label>
+        <div class="r2">
+          <input type="time" id="exp-ini" value="07:30">
+          <input type="time" id="exp-fim" value="13:30">
+        </div>
+      </div>
+      <div><label>Complementação (CCH)</label>
+        <div class="r2">
+          <input type="time" id="cch-ini" value="13:30">
+          <input type="time" id="cch-fim" value="18:30">
+        </div>
+      </div>
+      <div><label>Turno de serviço</label>
+        <select id="sv-turno">
+          <option value="6">6h por turno</option>
+          <option value="12" selected>12h (07–19 / 19–07)</option>
+        </select>
+      </div>
+      <div><label>Sobreaviso: 1h CH a cada</label>
+        <div class="r2">
+          <input type="number" id="sav-ratio" value="3" min="1" max="12">
+          <span style="display:flex;align-items:center;font-size:10px;color:var(--khaki)">horas SAV</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-hd" onclick="toggleSec(this)">🏛 Institucional <span class="sec-arr">▾</span></div>
+    <div class="sec-body hidden">
+      <div><label>Unidade</label>
+        <input type="text" id="inp-unidade" value='HBM/SM - "HOSPITAL CEL IZIDRO"'>
+      </div>
+      <div><label>Assinatura</label>
+        <input type="text" id="inp-ass" value="Luan Prestes de Lima - 1° Sgt">
+      </div>
+      <div><label>Cargo</label>
+        <input type="text" id="inp-cargo" value="Aux. Setor de Auditoria e Contas Médicas do HBM/SM">
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main id="main">
+  <div class="empty-state">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Selecione o mês<br>e clique em Gerar Calendário
+  </div>
+</main>
+
+<!-- MODAL DIA -->
+<div class="ov hidden" id="day-ov">
+<div class="modal">
+  <h2 id="dm-title">Dia 01</h2>
+  <div class="modal-sub" id="dm-sub"></div>
+
+  <div class="campo">
+    <label>Tipo de lançamento</label>
+    <div class="tipo-row">
+      <div class="tbtn tb-exp sel" data-t="exp" onclick="selT(this)">Expediente</div>
+      <div class="tbtn tb-sv"     data-t="sv"   onclick="selT(this)">Serviço</div>
+      <div class="tbtn tb-sav"    data-t="sav"  onclick="selT(this)">Sobreaviso</div>
+      <div class="tbtn tb-cch"    data-t="cch"  onclick="selT(this)">CCH</div>
+      <div class="tbtn tb-paec"   data-t="paec" onclick="selT(this)">PAEC</div>
+      <div class="tbtn tb-via"    data-t="via"  onclick="selT(this)">VIA</div>
+      <div class="tbtn tb-cod"    data-t="cod"  onclick="selT(this)">Código</div>
+    </div>
+  </div>
+
+  <div class="campo" id="c-exp">
+    <label>Horas de expediente</label>
+    <input type="number" id="v-exp" min="0" max="24" step="0.5">
+    <div class="qfill-row" style="margin-top:4px">
+      <button class="qfbtn" onclick="document.getElementById('v-exp').value=6">6h</button>
+      <button class="qfbtn" onclick="document.getElementById('v-exp').value=5.7">5,7h</button>
+      <button class="qfbtn" onclick="document.getElementById('v-exp').value=hdiff('exp-ini','exp-fim')">Auto</button>
+    </div>
+    <span class="campo-hint">Padrão: <span id="exp-pad">6h</span> (seg–sex). Fins de semana: opcional.</span>
+  </div>
+
+  <div class="campo hidden" id="c-sv">
+    <label>Turno de serviço</label>
+    <select id="v-sv-sel" onchange="svSelChange()">
+      <option value="6">07h–13h · 6h</option>
+      <option value="6b">13h–19h · 6h</option>
+      <option value="12" selected>07h–19h · 12h</option>
+      <option value="6n">19h–01h · 6h</option>
+      <option value="12n">19h–07h · 12h</option>
+      <option value="6nn">01h–07h · 6h</option>
+      <option value="manual">Outro (manual)</option>
+    </select>
+    <input type="number" id="v-sv" min="0" max="24" step="6" placeholder="horas" style="margin-top:5px">
+    <span class="campo-hint">Turnos de 6h ou 12h</span>
+  </div>
+
+  <div class="campo hidden" id="c-sav">
+    <label>Horas de sobreaviso</label>
+    <input type="number" id="v-sav" min="0" max="72" step="3" oninput="updSav()">
+    <div class="qfill-row" style="margin-top:4px">
+      <button class="qfbtn" onclick="document.getElementById('v-sav').value=12;updSav()">12h</button>
+      <button class="qfbtn" onclick="document.getElementById('v-sav').value=24;updSav()">24h</button>
+      <button class="qfbtn" onclick="document.getElementById('v-sav').value=48;updSav()">48h</button>
+    </div>
+    <span class="campo-hint" id="sav-hint">Razão atual: 1h CH a cada 3h SAV</span>
+  </div>
+
+  <div class="campo hidden" id="c-cch">
+    <label>Horas de complementação</label>
+    <input type="number" id="v-cch" min="0" max="24" step="1">
+    <div class="qfill-row" style="margin-top:4px">
+      <button class="qfbtn" onclick="document.getElementById('v-cch').value=hdiff('cch-ini','cch-fim')">Auto CCH</button>
+      <button class="qfbtn" onclick="document.getElementById('v-cch').value=5">5h</button>
+    </div>
+    <span class="campo-hint">Horas cheias · seg–sex 13:30–18:30 · fds qualquer horário</span>
+  </div>
+
+  <div class="campo hidden" id="c-paec">
+    <label>Horas de treinamento PAEC</label>
+    <input type="number" id="v-paec" min="0" max="40" step="1">
+    <span class="campo-hint">Treinamentos anuais — inserir horas contabilizadas</span>
+  </div>
+
+  <div class="campo hidden" id="c-via">
+    <label>Viagem a serviço</label>
+    <select id="v-via">
+      <option value="VIA">VIA — Viagem a Serviço</option>
+      <option value="DI">DI — Diária</option>
+    </select>
+    <span class="campo-hint" style="color:#e05050">⚠ Dia não contabiliza para CH disponível</span>
+  </div>
+
+  <div class="campo hidden" id="c-cod">
+    <label>Código / Situação</label>
+    <select id="v-cod">
+      <option value="Férias">Férias</option>
+      <option value="LTS">LTS — Licença Saúde</option>
+      <option value="ATT">ATT — Atestado</option>
+      <option value="RSP">RSP</option>
+      <option value="LGL">LGL — Gala</option>
+      <option value="LNJ">LNJ — Nojo / Luto</option>
+      <option value="FJ">FJ — Falta Justificada</option>
+      <option value="FNJ">FNJ — Falta Não Justificada</option>
+      <option value="F">F — Folga</option>
+      <option value="PRE">PRE — Licença Prêmio</option>
+      <option value="LGE">LGE — Licença Gestante</option>
+      <option value="LFC">LFC — Lic. Família</option>
+      <option value="LPA">LPA — Lic. Paternidade</option>
+      <option value="LAA">LAA — Aguardando Aposent.</option>
+      <option value="Inst">Inst — Instrução</option>
+      <option value="Curso">Curso</option>
+      <option value="D">D — Dispensa Sv</option>
+      <option value="DM">DM — Dispensa Médica</option>
+    </select>
+    <span class="campo-hint">Aparece na linha de Serviço. Alguns não contabilizam CH.</span>
+  </div>
+
+  <div class="mbtns">
+    <button class="btn" onclick="saveDay()">✓ Salvar</button>
+    <button class="btn btn-r" onclick="clearDay()" style="width:auto;padding:8px 12px;font-size:11px">🗑 Limpar</button>
+    <button class="btn btn-o" onclick="closeDay()" style="width:auto;padding:8px 12px;font-size:11px">Cancelar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL MILITAR -->
+<div class="ov hidden" id="mil-ov">
+<div class="modal modal-mil">
+  <h2 id="mil-ov-title">Novo Militar</h2>
+  <div class="campo"><label>Posto / Graduação</label>
+    <select id="m-posto">
+      <option>Cel PM</option><option>Ten Cel PM</option><option>Major PM</option>
+      <option>Cap PM</option><option>1° Ten PM</option><option>2° Ten PM</option>
+      <option>Asp Of PM</option>
+      <option>1° SGT PM</option><option>2° SGT PM</option><option>3° SGT PM</option>
+      <option>CB PM</option><option selected>Sd PM</option>
+    </select>
+  </div>
+  <div class="frow">
+    <div class="campo"><label>Nome completo</label>
+      <input type="text" id="m-nome" placeholder="NOME SOBRENOME" oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <div class="campo"><label>ID Funcional</label>
+      <input type="text" id="m-id" placeholder="0000000">
+    </div>
+  </div>
+  <div class="frow">
+    <div class="campo"><label>CH alvo mensal (h) — 0 = auto</label>
+      <input type="number" id="m-ch" value="0" min="0">
+    </div>
+    <div class="campo"><label>Jornada semanal</label>
+      <select id="m-jornada">
+        <option value="40">40h/semana</option>
+        <option value="30">30h/semana</option>
+        <option value="20">20h/semana</option>
+        <option value="custom">Personalizada</option>
+      </select>
+    </div>
+  </div>
+  <div class="campo"><label>Observações (opcional)</label>
+    <input type="text" id="m-obs" placeholder="Ex: servidor meio período, cedido, etc.">
+  </div>
+  <div class="mbtns">
+    <button class="btn" id="mil-save-btn" onclick="saveMil()">Adicionar</button>
+    <button class="btn btn-o" onclick="closeMilModal()">Cancelar</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL HISTÓRICO MILITAR -->
+<div class="ov hidden" id="hist-ov">
+<div class="modal modal-hist">
+  <h2 id="hist-title">Histórico</h2>
+  <div class="modal-sub" id="hist-sub"></div>
+  <div id="hist-body" style="overflow-y:auto;max-height:60vh"></div>
+  <div class="mbtns">
+    <button class="btn btn-o" onclick="document.getElementById('hist-ov').classList.add('hidden')">Fechar</button>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+             'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_ABR=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const DLS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DLC=['D','S','T','Q','Q','S','S'];
+const NAO_CH=['VIA','DI','ATT','RSP','Férias','LTS','LGE','LAA','LIP','PRE','Curso','LPA','D','DM'];
+
+// ── PERSISTÊNCIA ──────────────────────────────
+const STORAGE_KEY='escala_ch_hbm_v2';
+
+function saveToStorage(){
+  try{
+    const state={mils,dados,config:{
+      unidade:document.getElementById('inp-unidade')?.value||'',
+      ass:document.getElementById('inp-ass')?.value||'',
+      cargo:document.getElementById('inp-cargo')?.value||'',
+      savRatio:document.getElementById('sav-ratio')?.value||'3',
+      expIni:document.getElementById('exp-ini')?.value||'07:30',
+      expFim:document.getElementById('exp-fim')?.value||'13:30',
+    }};
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+    setDot(false);
+  }catch(e){console.warn('Erro ao salvar:',e);}
+}
+
+function loadFromStorage(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(!raw)return false;
+    const s=JSON.parse(raw);
+    if(s.mils)mils=s.mils;
+    if(s.dados)dados=s.dados;
+    if(s.config){
+      setTimeout(()=>{
+        const c=s.config;
+        if(c.unidade)document.getElementById('inp-unidade').value=c.unidade;
+        if(c.ass)document.getElementById('inp-ass').value=c.ass;
+        if(c.cargo)document.getElementById('inp-cargo').value=c.cargo;
+        if(c.savRatio)document.getElementById('sav-ratio').value=c.savRatio;
+        if(c.expIni)document.getElementById('exp-ini').value=c.expIni;
+        if(c.expFim)document.getElementById('exp-fim').value=c.expFim;
+      },100);
+    }
+    return true;
+  }catch(e){console.warn('Erro ao carregar:',e);return false;}
+}
+
+let _dirty=false,_saveTimer=null;
+function markDirty(){
+  setDot(true);
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(saveToStorage,1200);
+}
+function setDot(dirty){
+  _dirty=dirty;
+  const d=document.getElementById('save-dot');
+  if(d)d.classList.toggle('dirty',dirty);
+}
+
+// ── ESTADO ────────────────────────────────────
+let mils=[
+  {posto:'1° SGT PM',nome:'LUAN PRESTES DE LIMA',      id:'3148963',ch:177,jornada:40,obs:''},
+  {posto:'Sd PM',    nome:'ELISIANE CERON BOLSON',      id:'2909286',ch:85, jornada:20,obs:''},
+  {posto:'Sd PM',    nome:'VIVIANE PEDROZO ALVES NUNES',id:'2915278',ch:177,jornada:40,obs:''},
+  {posto:'Sd PM',    nome:'EVERTON RAFAEL GOMES SENA',  id:'2992582',ch:177,jornada:40,obs:''},
+];
+let dados={};
+let curMes=4,curAno=2026,diasMes=0,dsem=[];
+let curMil=0,curDia=null,curT='exp';
+let editMilIdx=-1; // -1 = novo
+let viewMode='cal'; // 'cal' ou 'overview'
+
+// ── SIDEBAR ────────────────────────────────────
+function toggleSec(h){
+  h.classList.toggle('open');
+  h.nextElementSibling.classList.toggle('hidden');
+}
+
+// ── MILITARES ──────────────────────────────────
+function renderMils(){
+  document.getElementById('mil-list').innerHTML=mils.map((m,i)=>{
+    const {tot,alvo}=chInfo(i);
+    const pct=alvo?Math.min(100,Math.round(tot/alvo*100)):0;
+    const cls=tot>=alvo?'ok':tot>alvo*.85?'warn':'ov-c';
+    const barClr=tot>=alvo?'#5ec878':tot>alvo*.85?'var(--gold)':'#e05050';
+    return `<div class="mc ${curMil===i?'active':''}" onclick="selMil(${i})">
+      <div class="mc-hd">
+        <div style="flex:1;min-width:0">
+          <div class="mc-name">${m.nome}</div>
+          <div class="mc-posto">${m.posto} · ${m.id}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+          <span class="mc-ch ${cls}">${tot}h</span>
+          <span class="mc-alvo">/ ${alvo}h</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;margin-left:4px">
+          <span class="mc-del" onclick="event.stopPropagation();editMil(${i})" title="Editar" style="color:var(--khaki);font-size:13px">✎</span>
+          <span class="mc-del" onclick="event.stopPropagation();delMil(${i})">×</span>
+        </div>
+      </div>
+      <div class="mc-bar"><div class="mc-bar-fill" style="width:${pct}%;background:${barClr}"></div></div>
+    </div>`;
+  }).join('')||'<div style="font-size:10px;color:var(--khaki);padding:4px">Nenhum militar cadastrado</div>';
+}
+
+function selMil(i){
+  curMil=i;
+  renderMils();
+  if(diasMes&&viewMode==='cal')renderCal();
+}
+
+function openMilModal(){
+  editMilIdx=-1;
+  document.getElementById('mil-ov-title').textContent='Novo Militar';
+  document.getElementById('mil-save-btn').textContent='Adicionar';
+  document.getElementById('m-nome').value='';
+  document.getElementById('m-id').value='';
+  document.getElementById('m-ch').value='0';
+  document.getElementById('m-obs').value='';
+  document.getElementById('mil-ov').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('m-nome').focus(),80);
+}
+
+function editMil(i){
+  editMilIdx=i;
+  const m=mils[i];
+  document.getElementById('mil-ov-title').textContent='Editar Militar';
+  document.getElementById('mil-save-btn').textContent='Salvar Alterações';
+  document.getElementById('m-posto').value=m.posto;
+  document.getElementById('m-nome').value=m.nome;
+  document.getElementById('m-id').value=m.id;
+  document.getElementById('m-ch').value=m.ch||0;
+  document.getElementById('m-obs').value=m.obs||'';
+  document.getElementById('mil-ov').classList.remove('hidden');
+}
+
+function closeMilModal(){document.getElementById('mil-ov').classList.add('hidden');editMilIdx=-1;}
+
+function saveMil(){
+  const nome=document.getElementById('m-nome').value.trim().toUpperCase();
+  if(!nome){toast('Informe o nome','err');return;}
+  const data={
+    posto:document.getElementById('m-posto').value,
+    nome,
+    id:document.getElementById('m-id').value.trim(),
+    ch:parseInt(document.getElementById('m-ch').value)||0,
+    obs:document.getElementById('m-obs').value.trim(),
+  };
+  if(editMilIdx>=0){
+    mils[editMilIdx]={...mils[editMilIdx],...data};
+    toast('Militar atualizado!','ok');
+  } else {
+    mils.push(data);
+    toast('Militar adicionado!','ok');
+  }
+  closeMilModal();
+  markDirty();
+  renderMils();
+  if(diasMes&&viewMode==='cal')renderCal();
+}
+
+function delMil(i){
+  if(!confirm('Remover '+mils[i].nome+'?\n\nTodos os lançamentos deste militar serão removidos.'))return;
+  delete dados[i];
+  // reindexar dados
+  const newDados={};
+  Object.keys(dados).forEach(k=>{
+    const ki=parseInt(k);
+    if(ki<i)newDados[ki]=dados[ki];
+    else if(ki>i)newDados[ki-1]=dados[ki];
+  });
+  dados=newDados;
+  mils.splice(i,1);
+  if(curMil>=mils.length)curMil=Math.max(0,mils.length-1);
+  markDirty();
+  renderMils();
+  if(diasMes&&viewMode==='cal')renderCal();
+}
+
+// ── HISTÓRICO ──────────────────────────────────
+function openHist(mi){
+  const m=mils[mi];
+  document.getElementById('hist-title').textContent=m.nome;
+  document.getElementById('hist-sub').textContent=`${m.posto} · ID ${m.id}`;
+  // coletar todos os meses com dados
+  const keys=Object.keys(dados[mi]||{});
+  const mesesMap={};
+  keys.forEach(k=>{
+    // formato: "mes-ano-dia"
+    const parts=k.split('-');
+    if(parts.length===3){
+      const mesKey=`${parts[1]}-${parts[0]}`; // ano-mes
+      if(!mesesMap[mesKey])mesesMap[mesKey]={mes:parseInt(parts[0]),ano:parseInt(parts[1])};
+    }
+  });
+  const mesesList=Object.values(mesesMap).sort((a,b)=>a.ano!==b.ano?a.ano-b.ano:a.mes-b.mes);
+
+  if(!mesesList.length){
+    document.getElementById('hist-body').innerHTML='<p style="color:var(--khaki);font-size:11px;padding:8px 0">Nenhum lançamento registrado para este militar.</p>';
+    document.getElementById('hist-ov').classList.remove('hidden');
+    return;
+  }
+
+  const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
+  let totalAcum=0;
+  const rows=mesesList.map(({mes,ano})=>{
+    const d=new Date(ano,mes+1,0).getDate();
+    let exp=0,sv=0,sav=0,cch=0,paec=0;
+    for(let day=1;day<=d;day++){
+      const dd=dados[mi]?.[`${mes}-${ano}-${day}`];
+      if(dd){exp+=dd.exp||0;sv+=dd.sv||0;sav+=dd.sav||0;cch+=dd.cch||0;paec+=dd.paec||0;}
+    }
+    const tot=Math.round((exp+sv+sav/ratio+cch+paec)*10)/10;
+    const alvo=m.ch||Math.round(calcDiasUteis(mes,ano)*5.7*10)/10;
+    totalAcum+=tot;
+    const cls=tot>=alvo?'ok':tot>alvo*.85?'warn':'ov-c';
+    return `<tr>
+      <td>${MESES_ABR[mes]} ${ano}</td>
+      <td style="text-align:right">${exp}h</td>
+      <td style="text-align:right">${sv}h</td>
+      <td style="text-align:right">${sav}h</td>
+      <td style="text-align:right">${cch}h</td>
+      <td style="text-align:right">${paec}h</td>
+      <td style="text-align:right"><span class="${cls}" style="font-weight:700">${tot}h</span></td>
+      <td style="text-align:right;color:var(--khaki)">${alvo}h</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('hist-body').innerHTML=`
+    <table class="hist-table">
+      <thead><tr>
+        <th>Mês</th><th style="text-align:right">Exp</th><th style="text-align:right">Sv</th>
+        <th style="text-align:right">SAV</th><th style="text-align:right">CCH</th>
+        <th style="text-align:right">PAEC</th>
+        <th style="text-align:right">Total CH</th><th style="text-align:right">Meta</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr style="border-top:1px solid var(--border)">
+        <td style="font-weight:700;font-family:'Barlow Condensed',sans-serif">TOTAL ACUMULADO</td>
+        <td colspan="5"></td>
+        <td style="text-align:right;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:var(--gold)">${Math.round(totalAcum*10)/10}h</td>
+        <td></td>
+      </tr></tfoot>
+    </table>`;
+  document.getElementById('hist-ov').classList.remove('hidden');
+}
+
+function calcDiasUteis(mes,ano){
+  const d=new Date(ano,mes+1,0).getDate();
+  let u=0;
+  for(let i=1;i<=d;i++){const dw=new Date(ano,mes,i).getDay();if(dw!==0&&dw!==6)u++;}
+  return u;
+}
+
+// ── PREENCHER RÁPIDO ───────────────────────────
+function quickFillMes(){
+  if(!diasMes){toast('Gere o calendário primeiro','err');return;}
+  if(!mils.length){toast('Nenhum militar selecionado','err');return;}
+  const tipo=document.getElementById('qf-tipo').value;
+  const horas=parseFloat(document.getElementById('qf-horas').value)||6;
+  let count=0;
+  for(let d=1;d<=diasMes;d++){
+    const dw=dsem[d-1];
+    if(dw===0||dw===6)continue; // pular fds
+    const dd=getDia(curMil,d)||{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''};
+    if(!dd.via&&!dd.cod){ // não sobrescreve VIA/código
+      dd[tipo]=(dd[tipo]||0)+horas;
+      // zerar os outros tipos para não acumular incorretamente
+      // (mantém outros se já existirem)
+      setDia(curMil,d,dd);
+      count++;
+    }
+  }
+  markDirty();
+  renderCal();renderMils();
+  toast(`${count} dias preenchidos com ${horas}h de ${tipo}`,'ok');
+}
+
+function clearMes(){
+  if(!diasMes){toast('Gere o calendário primeiro','err');return;}
+  if(!confirm(`Limpar TODOS os lançamentos de ${MESES[curMes]} ${curAno} para ${mils[curMil]?.nome}?`))return;
+  for(let d=1;d<=diasMes;d++)setDia(curMil,d,{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''});
+  markDirty();renderCal();renderMils();
+  toast('Mês limpo!');
+}
+
+// ── CALENDÁRIO ─────────────────────────────────
+function buildCal(){
+  curMes=+document.getElementById('sel-mes').value;
+  curAno=+document.getElementById('sel-ano').value;
+  diasMes=new Date(curAno,curMes+1,0).getDate();
+  dsem=[];for(let d=1;d<=diasMes;d++)dsem.push(new Date(curAno,curMes,d).getDay());
+  document.getElementById('hd-sub').textContent=
+    `HBM/SM · ${MESES[curMes]} ${curAno} · ${mils.length} militares`;
+  viewMode='cal';
+  renderCal();renderMils();
+}
+
+function showOverview(){
+  viewMode='overview';
+  renderOverview();
+}
+
+function renderOverview(){
+  if(!mils.length){
+    document.getElementById('main').innerHTML='<div class="empty-state">Nenhum militar cadastrado</div>';
+    return;
+  }
+  // Coletar todos os meses/anos com dados
+  const mesSet=new Set();
+  mils.forEach((_,mi)=>{
+    Object.keys(dados[mi]||{}).forEach(k=>{
+      const p=k.split('-');
+      if(p.length===3)mesSet.add(`${p[0]}-${p[1]}`);
+    });
+  });
+  // Se calendário aberto, incluir mês atual
+  if(diasMes)mesSet.add(`${curMes}-${curAno}`);
+  const mesesList=[...mesSet].map(k=>{const[m,a]=k.split('-');return{mes:+m,ano:+a};})
+    .sort((a,b)=>a.ano!==b.ano?a.ano-b.ano:a.mes-b.mes);
+
+  if(!mesesList.length){
+    document.getElementById('main').innerHTML=`
+      <div class="overview-wrap">
+        <div class="ov-title">Visão Geral — Controle de CH</div>
+        <p style="color:var(--khaki);font-size:12px">Gere o calendário de pelo menos um mês para ver o controle.</p>
+      </div>`;
+    return;
+  }
+
+  const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
+
+  const thMeses=mesesList.map(({mes,ano})=>
+    `<th style="text-align:center">${MESES_ABR[mes]}<br><span style="font-size:9px;font-weight:400">${ano}</span></th>`
+  ).join('');
+
+  const rows=mils.map((m,mi)=>{
+    const cells=mesesList.map(({mes,ano})=>{
+      const d=new Date(ano,mes+1,0).getDate();
+      let tot=0;
+      for(let day=1;day<=d;day++){
+        const dd=dados[mi]?.[`${mes}-${ano}-${day}`];
+        if(dd)tot+=((dd.exp||0)+(dd.sv||0)+(dd.sav||0)/ratio+(dd.cch||0)+(dd.paec||0));
+      }
+      tot=Math.round(tot*10)/10;
+      const alvo=m.ch||Math.round(calcDiasUteis(mes,ano)*5.7*10)/10;
+      if(!tot)return`<td style="text-align:center"><span class="badge-empty ov-badge">–</span></td>`;
+      const cls=tot>=alvo?'badge-ok':tot>alvo*.85?'badge-warn':'badge-low';
+      return`<td class="ov-mes-cell"><span class="ov-badge ${cls}">${tot}h</span><span class="sub">${alvo}h</span></td>`;
+    }).join('');
+
+    // acumulado
+    let acum=0;
+    Object.keys(dados[mi]||{}).forEach(k=>{
+      const dd=dados[mi][k];
+      acum+=((dd.exp||0)+(dd.sv||0)+(dd.sav||0)/ratio+(dd.cch||0)+(dd.paec||0));
+    });
+    acum=Math.round(acum*10)/10;
+
+    return`<tr>
+      <td>
+        <div class="ov-mil-name">${m.nome}</div>
+        <div class="ov-mil-posto">${m.posto} · ${m.id}</div>
+        ${m.obs?`<div style="font-size:9px;color:var(--khaki);font-style:italic">${m.obs}</div>`:''}
+      </td>
+      ${cells}
+      <td style="text-align:center">
+        <span class="ov-badge" style="background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)">${acum}h</span>
+      </td>
+      <td style="text-align:center">
+        <button class="qfbtn" onclick="openHist(${mi})">📋 Ver</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('main').innerHTML=`
+    <div class="overview-wrap">
+      <div class="ov-title">Visão Geral — Controle de Carga Horária</div>
+      <div style="overflow-x:auto">
+        <table class="ov-table">
+          <thead>
+            <tr>
+              <th>Militar</th>
+              ${thMeses}
+              <th style="text-align:center">Acumulado</th>
+              <th style="text-align:center">Histórico</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--khaki)">Legenda:</span>
+        <span class="ov-badge badge-ok" style="font-size:10px">Meta atingida</span>
+        <span class="ov-badge badge-warn" style="font-size:10px">&gt;85% da meta</span>
+        <span class="ov-badge badge-low" style="font-size:10px">Abaixo da meta</span>
+        <span class="badge-empty ov-badge" style="font-size:10px">Sem lançamentos</span>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-o" style="width:auto;padding:6px 14px;font-size:11px" onclick="buildCal()">← Voltar ao Calendário</button>
+      </div>
+    </div>`;
+}
+
+function renderCal(){
+  viewMode='cal';
+  if(!mils.length){
+    document.getElementById('main').innerHTML='<div class="empty-state">Nenhum militar cadastrado</div>';
+    return;
+  }
+  const mil=mils[curMil];
+  const today=new Date();
+  const todayD=today.getDate(),todayM=today.getMonth(),todayA=today.getFullYear();
+
+  const tabs=mils.map((m,i)=>
+    `<div class="tab ${curMil===i?'active':''}" onclick="selMil(${i})">${m.nome.split(' ')[0]}</div>`
+  ).join('');
+
+  const chb=mils.map((m,i)=>{
+    const {tot,alvo}=chInfo(i);
+    const cls=tot>=alvo?'ok':tot>alvo*.85?'warn':'ov-c';
+    return `<div class="ch-item ${curMil===i?'ch-active':''}" onclick="selMil(${i})">
+      <span class="ch-nome">${m.nome.split(' ')[0]}</span>
+      <span class="ch-val ${cls}">${tot}h</span>
+      <span class="ch-alvo2">meta ${alvo}h</span></div>`;
+  }).join('');
+
+  const wkHd=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d,i)=>
+    `<div class="wdh ${i===0||i===6?'we':''}">${d}</div>`).join('');
+
+  const pri=dsem[0];
+  let semanas=[[]];
+  for(let i=0;i<pri;i++)semanas[0].push(null);
+  for(let d=1;d<=diasMes;d++){
+    const last=semanas[semanas.length-1];
+    if(last.length===7)semanas.push([]);
+    semanas[semanas.length-1].push(d);
+  }
+  while(semanas[semanas.length-1].length<7)semanas[semanas.length-1].push(null);
+
+  const calHtml=semanas.map(sem=>{
+    const cells=sem.map(d=>{
+      if(!d)return`<div class="day empty"></div>`;
+      const ds=dsem[d-1],isWe=ds===0||ds===6;
+      const isToday=(d===todayD&&curMes===todayM&&curAno===todayA);
+      const dd=getDia(curMil,d);
+      const has=dd&&(dd.exp||dd.sv||dd.sav||dd.cch||dd.paec||dd.via||dd.cod);
+      let tags='';
+      if(dd){
+        if(dd.exp) tags+=`<div class="dtag te"><span>Exp</span><span>${dd.exp}h</span></div>`;
+        if(dd.sv)  tags+=`<div class="dtag ts"><span>Sv</span><span>${dd.sv}h</span></div>`;
+        if(dd.sav) tags+=`<div class="dtag tv"><span>SAV</span><span>${dd.sav}h</span></div>`;
+        if(dd.cch) tags+=`<div class="dtag tc"><span>CCH</span><span>${dd.cch}h</span></div>`;
+        if(dd.paec)tags+=`<div class="dtag tp"><span>PAEC</span><span>${dd.paec}h</span></div>`;
+        if(dd.via) tags+=`<div class="dtag tvia"><span>${dd.via}</span></div>`;
+        if(dd.cod) tags+=`<div class="dtag tcod"><span>${dd.cod}</span></div>`;
+      }
+      return`<div class="day ${isWe?'we':''} ${has?'has':''} ${isToday?'today':''}" onclick="openDay(${d})">
+        <div class="day-hd"><span class="d-num">${d}</span><span class="d-wk">${DLS[ds].substring(0,3)}</span></div>
+        <div class="day-body">${tags}</div>
+      </div>`;
+    }).join('');
+    return`<div class="week">${cells}</div>`;
+  }).join('');
+
+  const {tot,alvo}=chInfo(curMil);
+  const pct=alvo?Math.min(100,Math.round(tot/alvo*100)):0;
+  const barClr=tot>=alvo?'#5ec878':tot>alvo*.85?'var(--gold)':'#e05050';
+
+  document.getElementById('main').innerHTML=`
+    <div class="tabs">
+      ${tabs}
+      <div class="tab tab-overview" onclick="showOverview()">📊 Geral</div>
+    </div>
+    <div class="ch-bar">${chb}</div>
+    <div class="cal-wrap">
+      <div class="cal-title">
+        ${mil.nome} — ${MESES[curMes]} ${curAno}
+        <button class="qfbtn" style="margin-left:auto" onclick="openHist(${curMil})">📋 Histórico</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+        <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px">
+          <div style="height:100%;width:${pct}%;background:${barClr};border-radius:2px;transition:width .4s"></div>
+        </div>
+        <span style="font-size:10px;color:var(--khaki);white-space:nowrap">${pct}% · ${tot}h / ${alvo}h</span>
+      </div>
+      <div class="weekday-hd">${wkHd}</div>
+      ${calHtml}
+    </div>`;
+}
+
+// ── MODAL DIA ──────────────────────────────────
+function openDay(d){
+  curDia=d;
+  const ds=dsem[d-1],mil=mils[curMil];
+  const dd=getDia(curMil,d);
+  const expH=hdiff('exp-ini','exp-fim');
+  document.getElementById('dm-title').textContent=`${DLS[ds]}, ${d} — ${mil.nome.split(' ')[0]}`;
+  document.getElementById('dm-sub').textContent=`${MESES[curMes]} ${curAno} · ${mil.posto}`;
+  document.getElementById('exp-pad').textContent=expH+'h';
+  document.getElementById('v-exp').value= dd?.exp!==undefined?dd.exp:(ds!==0&&ds!==6?expH:'');
+  document.getElementById('v-sv').value = dd?.sv||'';
+  document.getElementById('v-sav').value= dd?.sav||'';
+  document.getElementById('v-cch').value= dd?.cch||'';
+  document.getElementById('v-paec').value=dd?.paec||'';
+  if(dd?.via)document.getElementById('v-via').value=dd.via;
+  if(dd?.cod)document.getElementById('v-cod').value=dd.cod;
+  updSav();
+  selTStr('exp');
+  document.getElementById('day-ov').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('v-exp').focus(),80);
+}
+function closeDay(){document.getElementById('day-ov').classList.add('hidden');curDia=null;}
+
+function selT(btn){selTStr(btn.dataset.t);}
+function selTStr(t){
+  curT=t;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
+  ['exp','sv','sav','cch','paec','via','cod'].forEach(c=>{
+    document.getElementById('c-'+c).classList.toggle('hidden',c!==t);
+  });
+  const fm={exp:'v-exp',sv:'v-sv',sav:'v-sav',cch:'v-cch',paec:'v-paec'};
+  if(fm[t])setTimeout(()=>document.getElementById(fm[t]).focus(),50);
+}
+
+function updSav(){
+  const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
+  const h=parseFloat(document.getElementById('v-sav').value)||0;
+  document.getElementById('sav-hint').textContent=
+    h?`${h}h SAV = ${Math.round(h/ratio*10)/10}h na CH`:`1h CH a cada ${ratio}h de sobreaviso`;
+}
+
+function svSelChange(){
+  const v=document.getElementById('v-sv-sel').value;
+  const m={6:6,'6b':6,12:12,'6n':6,'12n':12,'6nn':6};
+  if(m[v]!==undefined)document.getElementById('v-sv').value=m[v];
+}
+
+function saveDay(){
+  if(!curDia)return;
+  const dd={
+    exp: parseFloat(document.getElementById('v-exp').value)||0,
+    sv:  parseFloat(document.getElementById('v-sv').value)||0,
+    sav: parseFloat(document.getElementById('v-sav').value)||0,
+    cch: parseFloat(document.getElementById('v-cch').value)||0,
+    paec:parseFloat(document.getElementById('v-paec').value)||0,
+    via: curT==='via'?document.getElementById('v-via').value:'',
+    cod: curT==='cod'?document.getElementById('v-cod').value:'',
+  };
+  setDia(curMil,curDia,dd);
+  markDirty();
+  closeDay();renderCal();renderMils();
+}
+
+function clearDay(){
+  if(!curDia)return;
+  setDia(curMil,curDia,{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''});
+  markDirty();
+  closeDay();renderCal();renderMils();
+}
+
+// ── DADOS ──────────────────────────────────────
+function getDia(mi,d){return dados[mi]?.[`${curMes}-${curAno}-${d}`];}
+function setDia(mi,d,v){if(!dados[mi])dados[mi]={};dados[mi][`${curMes}-${curAno}-${d}`]=v;}
+
+// ── CH ─────────────────────────────────────────
+function hdiff(a,b){
+  const [ha,ma]=document.getElementById(a).value.split(':').map(Number);
+  const [hb,mb]=document.getElementById(b).value.split(':').map(Number);
+  return Math.round(((hb*60+mb)-(ha*60+ma))/60*10)/10;
+}
+
+function chInfo(mi){
+  if(!diasMes)return{tot:0,alvo:0,disp:0};
+  const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
+  let exp=0,sv=0,sav=0,cch=0,paec=0,disp=0;
+  for(let d=1;d<=diasMes;d++){
+    const ds=dsem[d-1];
+    const dd=getDia(mi,d);
+    if(dd){exp+=dd.exp||0;sv+=dd.sv||0;sav+=dd.sav||0;cch+=dd.cch||0;paec+=dd.paec||0;}
+    if(ds!==0&&ds!==6){
+      const v=dd?.via||'',c=dd?.cod||'';
+      if(!NAO_CH.includes(v)&&!NAO_CH.includes(c))disp++;
+    }
+  }
+  const tot=Math.round((exp+sv+sav/ratio+cch+paec)*10)/10;
+  const mil=mils[mi];
+  const alvo=mil?.ch||Math.round(disp*5.7*10)/10;
+  return{tot,alvo,disp};
+}
+
+// ── BACKUP / IMPORTAR ──────────────────────────
+function exportJSON(){
+  const state={
+    version:2,
+    exportedAt:new Date().toISOString(),
+    mils,dados,
+    config:{
+      unidade:document.getElementById('inp-unidade').value,
+      ass:document.getElementById('inp-ass').value,
+      cargo:document.getElementById('inp-cargo').value,
+    }
+  };
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`escala_ch_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
+  toast('Backup exportado!','ok');
+}
+
+function importJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const s=JSON.parse(e.target.result);
+      if(!s.mils||!s.dados)throw new Error('Formato inválido');
+      if(!confirm(`Importar dados de ${s.exportedAt||'data desconhecida'}?\n\nISTO SUBSTITUIRÁ todos os dados atuais.`))return;
+      mils=s.mils;dados=s.dados;
+      if(s.config){
+        document.getElementById('inp-unidade').value=s.config.unidade||'';
+        document.getElementById('inp-ass').value=s.config.ass||'';
+        document.getElementById('inp-cargo').value=s.config.cargo||'';
+      }
+      saveToStorage();
+      renderMils();
+      if(diasMes)renderCal();
+      toast('Dados importados com sucesso!','ok');
+    }catch(err){toast('Erro ao importar: '+err.message,'err');}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+
+// ── EXPORT EXCEL ───────────────────────────────
+function exportExcel(){
+  if(!diasMes){toast('Gere o calendário primeiro','err');return;}
+  const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
+  const nm=MESES[curMes].toUpperCase();
+  const unid=document.getElementById('inp-unidade').value;
+  const ass=document.getElementById('inp-ass').value;
+  const cargo=document.getElementById('inp-cargo').value;
+  const wb=XLSX.utils.book_new();
+  const ws=[];
+
+  ws.push([`ESTADO DO RIO GRANDE DO SUL  SECRETARIA DA SEGURANÇA PÚBLICA  BRIGADA MILITAR - DS  ${unid}`]);
+  ws.push([]);
+  ws.push([`ESCALA DE SERVIÇO PARA FINS DE SAQUE DE ETAPA DE ALIMENTAÇÃO 01 à ${diasMes} DE ${nm} DE ${curAno}`]);
+
+  const hd=['Posto','Nome','Id Func.  ','Horário'];
+  for(let d=1;d<=diasMes;d++)hd.push(d);
+  hd.push('TOTAL','CH','ETAPA');
+  ws.push(hd);
+
+  const dl=['','','',''];
+  for(let d=1;d<=diasMes;d++)dl.push(DLC[dsem[d-1]]);
+  dl.push('','','');
+  ws.push(dl);
+
+  const TIPS=[
+    {k:'exp',l:'Expediente'},{k:'sv',l:'Serviço'},
+    {k:'sav',l:'Sobreaviso'},{k:'cch',l:'CCH'},{k:'paec',l:'PAEC'},
+  ];
+
+  mils.forEach((m,mi)=>{
+    const {tot,alvo}=chInfo(mi);
+    const eta=Math.round((tot-alvo)*10)/10;
+    const etaS=m.ch?(eta>=0?'+'+eta:String(eta)):'–';
+
+    TIPS.forEach((t,ti)=>{
+      const row=[ti===0?m.posto:'',ti===0?m.nome:'',ti===0?m.id:'',t.l];
+      let lt=0;
+      for(let d=1;d<=diasMes;d++){
+        const dd=getDia(mi,d);
+        let v='';
+        if(dd){
+          if(t.k==='exp'&&dd.cod)v=dd.cod;
+          else v=dd[t.k]||'';
+        }
+        if(typeof v==='number'||(!isNaN(v)&&v!==''))lt+=parseFloat(v)||0;
+        row.push(v===0?'':v);
+      }
+      row.push(lt||'');
+      row.push(ti===0?m.ch||'':'');
+      row.push(ti===0?etaS:'');
+      ws.push(row);
+    });
+
+    const vr=['','','','VIA'];
+    for(let d=1;d<=diasMes;d++)vr.push(getDia(mi,d)?.via||'');
+    vr.push('','','');ws.push(vr);
+
+    const tr=['','','','Total'];
+    for(let d=1;d<=diasMes;d++)tr.push('');
+    tr.push(tot,'','');ws.push(tr);
+    ws.push([]);
+  });
+
+  ws.push([]);
+  ws.push(['','Legenda : linha de Sv']);
+  ws.push(['','LGL= Gala - LNJ= Nojo (Luto) - LPA= Licença Paternidade FJ= Falta Justificada - FNJ= Falta Não Justificada']);
+  ws.push(['','LAS= Licença Saúde por Acid. Sv Lei 10.395 LTS= Licença Saúde LFC = Licença Saúde Pessoa da Família']);
+  ws.push(['','LGE= Licença Gestante - LAD= Licença Adoção - LAA= Licença Aguardando Aposentadoria','','','','','','','','','','','','','','____________________________________________________________']);
+  ws.push(['','DI= Viagem com Diária F= Folga - FER= Férias - DM= Dispensa Médica','','','','','','','','','','','','','','',ass]);
+  ws.push(['','D=Dispensa SV - C= Curso - Exp=Expediente Adm - SAV=Sobreaviso','','','','','','','','','','','','','','',cargo]);
+
+  const sheet=XLSX.utils.aoa_to_sheet(ws);
+  const cols=[{wch:14},{wch:28},{wch:11},{wch:11}];
+  for(let i=0;i<diasMes;i++)cols.push({wch:4});
+  cols.push({wch:7},{wch:5},{wch:7});
+  sheet['!cols']=cols;
+  XLSX.utils.book_append_sheet(wb,sheet,MESES[curMes].substring(0,3));
+  XLSX.writeFile(wb,`Escala_CH_${nm}_${curAno}.xlsx`);
+  toast('Exportado com sucesso!','ok');
+}
+
+// ── UTILITÁRIOS ────────────────────────────────
+function toast(msg,t=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.className='toast show '+(t||'');
+  clearTimeout(el._t);el._t=setTimeout(()=>{el.className='toast';},3000);
+}
+
+// ── TECLADO ────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.getElementById('day-ov').classList.add('hidden');
+    document.getElementById('mil-ov').classList.add('hidden');
+    document.getElementById('hist-ov').classList.add('hidden');
+  }
+  if(e.key==='Enter'&&!document.getElementById('day-ov').classList.contains('hidden'))saveDay();
+});
+document.getElementById('m-nome').addEventListener('keydown',e=>{if(e.key==='Enter')saveMil();});
+
+// Autosave ao sair da página
+window.addEventListener('beforeunload',()=>{if(_dirty)saveToStorage();});
+
+// ── INICIALIZAÇÃO ──────────────────────────────
+const loaded=loadFromStorage();
+if(loaded)toast('Dados restaurados ✓','ok');
+renderMils();
+</script>
+</body>
+</html>
