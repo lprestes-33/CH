@@ -2,235 +2,367 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Meta tags para PWA e Mobile -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1a2e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Escala CH — HBM/SM</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
 :root{
-  --bg:#141e14;--panel:#1c2e1c;--card:#213021;--border:rgba(180,150,60,.22);
-  --gold:#c9a84c;--gold2:#e8c96a;--khaki:#8a7a5a;--paper:#f0ead8;
-  --green:#2d4a2d;--danger:#8b2020;--ok:#4a9a5a;--info:#2a5080;
-  --exp:#1a4a2a;--sv:#1a2a4a;--sav:#3a2a10;--cch:#2a1a3a;--paec:#1a3a3a;--via:#3a1a1a;
+  --bg: #0f160f;
+  --panel: #162216;
+  --card: #1c2b1c;
+  --border: rgba(201, 168, 76, 0.2);
+  --border-hover: rgba(201, 168, 76, 0.4);
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --khaki: #9e9070;
+  --paper: #f4efdf;
+  --green: #1a2e1a;
+  --green-light: #2a472a;
+  --danger: #9c2b2b;
+  --ok: #50a862;
+  --info: #35659e;
+  
+  /* Tag Colors */
+  --exp: #1e5230; --sv: #1e3552; --sav: #4a3818; 
+  --cch: #38244a; --paec: #1e4a4a; --via: #4a2424;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Barlow',sans-serif;background:var(--bg);color:var(--paper);font-size:13px}
-body{display:grid;grid-template-rows:auto 1fr;grid-template-columns:278px 1fr;overflow:hidden}
 
-header{grid-column:1/-1;background:var(--green);border-bottom:3px solid var(--gold);
-  padding:11px 18px;display:flex;align-items:center;gap:12px}
-.shield{width:40px;height:48px;background:var(--gold);flex-shrink:0;
-  clip-path:polygon(50% 0%,100% 18%,100% 72%,50% 100%,0% 72%,0% 18%);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;color:var(--bg)}
-header h1{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;
-  letter-spacing:2px;color:var(--gold);text-transform:uppercase}
-header p{font-size:10px;color:var(--khaki);letter-spacing:.8px}
-.hdr{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { 
+  height: 100%; 
+  font-family: 'Barlow', sans-serif; 
+  background: var(--bg); 
+  color: var(--paper); 
+  font-size: 13px; 
+  -webkit-font-smoothing: antialiased;
+}
 
-aside{background:rgba(0,0,0,.32);border-right:1px solid var(--border);
-  overflow-y:auto;display:flex;flex-direction:column}
-main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+body { 
+  display: grid; 
+  grid-template-rows: auto 1fr; 
+  grid-template-columns: 290px 1fr; 
+  overflow: hidden; 
+}
 
-.sec{border-bottom:1px solid var(--border)}
-.sec-hd{padding:9px 13px;font-family:'Barlow Condensed',sans-serif;font-size:11px;
-  font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);
-  display:flex;align-items:center;gap:6px;cursor:pointer;
-  background:rgba(201,168,76,.05);transition:background .15s;user-select:none}
-.sec-hd:hover{background:rgba(201,168,76,.11)}
-.sec-arr{margin-left:auto;transition:transform .2s;font-size:10px}
-.sec-hd.open .sec-arr{transform:rotate(180deg)}
-.sec-body{padding:11px 13px;display:flex;flex-direction:column;gap:7px}
-.sec-body.hidden{display:none}
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+::-webkit-scrollbar-thumb { background: rgba(201, 168, 76, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 168, 76, 0.6); }
 
-label{font-size:10px;letter-spacing:.5px;color:var(--khaki);display:block;margin-bottom:3px;text-transform:uppercase}
-input,select{width:100%;background:rgba(0,0,0,.35);border:1px solid rgba(180,150,60,.3);
-  border-radius:3px;color:var(--paper);font-family:'Barlow',sans-serif;font-size:12px;
-  padding:6px 8px;transition:border-color .15s}
-input:focus,select:focus{outline:none;border-color:var(--gold)}
-select option{background:#1c2e1c}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+/* Header */
+header { 
+  grid-column: 1 / -1; 
+  background: var(--green); 
+  border-bottom: 3px solid var(--gold);
+  padding: 12px 20px; 
+  display: flex; 
+  align-items: center; 
+  gap: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+.shield { 
+  width: 42px; height: 50px; 
+  background: linear-gradient(135deg, var(--gold2), var(--gold)); 
+  flex-shrink: 0;
+  clip-path: polygon(50% 0%, 100% 15%, 100% 75%, 50% 100%, 0% 75%, 0% 15%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 13px; color: var(--bg);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+header h1 { 
+  font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700;
+  letter-spacing: 2px; color: var(--gold2); text-transform: uppercase; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+header p { font-size: 11px; color: var(--khaki); letter-spacing: 0.8px; }
+.hdr { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; align-items: center;}
 
-.btn{display:flex;align-items:center;justify-content:center;gap:5px;
-  background:var(--gold);color:var(--bg);border:none;border-radius:3px;
-  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;
-  letter-spacing:1.5px;text-transform:uppercase;padding:7px 11px;cursor:pointer;
-  transition:background .15s,transform .1s;width:100%}
-.btn:hover{background:var(--gold2);transform:translateY(-1px)}
-.btn:active{transform:none}
-.btn-o{background:transparent;border:1px solid var(--gold);color:var(--gold)}
-.btn-o:hover{background:rgba(201,168,76,.1)}
-.btn-g{background:linear-gradient(135deg,#1a6a3a,#28a050);color:#fff;border:1px solid #3acc60}
-.btn-g:hover{background:linear-gradient(135deg,#208044,#30b85a)}
-.btn-r{background:var(--danger);color:#fff}
-.btn-r:hover{background:#a02828}
-.btn-b{background:linear-gradient(135deg,#1a3a6a,#2860b0);color:#fff;border:1px solid #3a6acc}
-.btn-b:hover{background:linear-gradient(135deg,#1e4480,#3070c8)}
-.btn-sm{width:auto;font-size:11px;padding:6px 12px}
+/* Layout */
+aside { 
+  background: var(--panel); 
+  border-right: 1px solid var(--border);
+  overflow-y: auto; display: flex; flex-direction: column; 
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2); z-index: 5;
+}
+main { overflow: hidden; display: flex; flex-direction: column; min-width: 0; position: relative; }
 
-/* save indicator */
-.save-dot{width:7px;height:7px;border-radius:50%;background:#5ec878;flex-shrink:0;
-  transition:background .3s;box-shadow:0 0 6px rgba(94,200,120,.5)}
-.save-dot.dirty{background:var(--gold);box-shadow:0 0 6px rgba(201,168,76,.5)}
+/* Sections */
+.sec { border-bottom: 1px solid var(--border); }
+.sec-hd { 
+  padding: 12px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--gold);
+  display: flex; align-items: center; gap: 8px; cursor: pointer;
+  background: rgba(201,168,76,0.03); transition: background 0.2s, color 0.2s; user-select: none;
+}
+.sec-hd:hover { background: rgba(201,168,76,0.1); color: var(--gold2); }
+.sec-arr { margin-left: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 11px; }
+.sec-hd.open .sec-arr { transform: rotate(180deg); }
+.sec-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.3s ease; }
+.sec-body.hidden { display: none; }
 
-.mc{border:1px solid var(--border);border-radius:3px;margin-bottom:5px;cursor:pointer;
-  transition:border-color .15s,background .15s;overflow:hidden}
-.mc:hover{border-color:var(--gold)}
-.mc.active{border-color:var(--gold);background:rgba(201,168,76,.06)}
-.mc-hd{padding:7px 9px;display:flex;justify-content:space-between;align-items:center;gap:6px}
-.mc-name{font-weight:600;font-size:11px;line-height:1.2}
-.mc-posto{font-size:9px;color:var(--khaki);margin-top:1px}
-.mc-ch{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-align:right}
-.mc-alvo{font-size:9px;color:var(--khaki)}
-.mc-del{color:var(--danger);cursor:pointer;font-size:15px;padding:1px 4px;
-  border-radius:2px;line-height:1;flex-shrink:0}
-.mc-del:hover{background:rgba(139,32,32,.2)}
-.mc-bar{height:3px;background:rgba(255,255,255,.06);margin:0 9px 6px}
-.mc-bar-fill{height:100%;border-radius:2px;transition:width .4s}
-.ok{color:#5ec878}.warn{color:var(--gold)}.ov-c{color:#e05050}
+/* Form Elements */
+label { font-size: 11px; letter-spacing: 0.5px; color: var(--khaki); display: block; margin-bottom: 4px; text-transform: uppercase; font-weight: 500;}
+input, select { 
+  width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(180,150,60,0.3);
+  border-radius: 4px; color: var(--paper); font-family: 'Barlow', sans-serif; font-size: 13px;
+  padding: 8px 10px; transition: all 0.2s; 
+}
+input:focus, select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,168,76,0.2); }
+select option { background: var(--panel); }
+.r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-/* tabs */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
-.tab{padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;
-  letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;
-  color:var(--khaki);white-space:nowrap;transition:color .15s,border-color .15s;user-select:none}
-.tab:hover{color:var(--paper)}.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-/* tab "visão geral" especial */
-.tab-overview{border-left:1px solid var(--border);margin-left:auto}
+/* Buttons */
+.btn { 
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--gold); color: var(--bg); border: none; border-radius: 4px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 14px; cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.btn:hover { background: var(--gold2); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+.btn:active { transform: translateY(0); box-shadow: 0 2px 3px rgba(0,0,0,0.2); }
+.btn-o { background: transparent; border: 1px solid var(--gold); color: var(--gold); box-shadow: none; }
+.btn-o:hover { background: rgba(201,168,76,0.15); color: var(--gold2); border-color: var(--gold2); }
+.btn-g { background: linear-gradient(135deg, #1e6b3b, #2b9c52); color: #fff; border: 1px solid #3acc60; }
+.btn-g:hover { background: linear-gradient(135deg, #248247, #33ba62); }
+.btn-r { background: var(--danger); color: #fff; }
+.btn-r:hover { background: #ba3434; }
+.btn-b { background: linear-gradient(135deg, #20457a, #306dbf); color: #fff; border: 1px solid #4a82e0; }
+.btn-b:hover { background: linear-gradient(135deg, #275496, #3b84e8); }
+.btn-pwa { background: linear-gradient(135deg, #8a2be2, #a020f0); color: #fff; border: 1px solid #b840ff; display: none; }
+.btn-pwa:hover { background: linear-gradient(135deg, #9b30ff, #b23aee); }
+.btn-sm { width: auto; font-size: 12px; padding: 6px 12px; }
 
-/* ch bar */
-.ch-bar{display:flex;gap:14px;flex-wrap:wrap;padding:7px 16px;
-  background:rgba(0,0,0,.2);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
-.ch-item{display:flex;flex-direction:column;gap:0;cursor:pointer;padding:3px 6px;border-radius:3px;
-  border:1px solid transparent;transition:border-color .15s}
-.ch-item:hover{border-color:var(--border)}
-.ch-item.ch-active{border-color:var(--gold);background:rgba(201,168,76,.06)}
-.ch-nome{font-size:9px;color:var(--khaki);letter-spacing:.4px}
-.ch-val{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700}
-.ch-alvo2{font-size:9px;color:var(--khaki)}
+/* Save Indicator */
+.save-dot { 
+  width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s; box-shadow: 0 0 8px rgba(80,168,98,0.6); margin-right: 5px;
+}
+.save-dot.dirty { background: var(--gold); box-shadow: 0 0 8px rgba(201,168,76,0.6); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-/* calendário */
-.cal-wrap{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.cal-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
-  letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex-shrink:0;
-  display:flex;align-items:center;gap:10px}
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.weekday-hd{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:2px}
-.wdh{text-align:center;font-size:9px;letter-spacing:.8px;color:var(--khaki);padding:3px 0;text-transform:uppercase}
-.wdh.we{color:#c07070}
+/* Military Cards */
+.mc { 
+  border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer;
+  transition: all 0.2s; overflow: hidden; background: rgba(0,0,0,0.2); position: relative;
+}
+.mc:hover { border-color: var(--border-hover); background: rgba(201,168,76,0.05); transform: translateX(2px); }
+.mc.active { border-color: var(--gold); background: rgba(201,168,76,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.mc-hd { padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.mc-name { font-weight: 600; font-size: 12px; line-height: 1.3; color: var(--paper); }
+.mc-posto { font-size: 10px; color: var(--khaki); margin-top: 2px; }
+.mc-ch { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; text-align: right; }
+.mc-alvo { font-size: 10px; color: var(--khaki); }
+.mc-del { 
+  color: var(--danger); cursor: pointer; font-size: 16px; padding: 2px 6px;
+  border-radius: 4px; line-height: 1; flex-shrink: 0; opacity: 0.7; transition: all 0.2s;
+}
+.mc-del:hover { background: rgba(156,43,43,0.3); opacity: 1; }
+.mc-bar { height: 4px; background: rgba(0,0,0,0.5); margin: 0 12px 8px; border-radius: 2px; overflow: hidden; }
+.mc-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.ok { color: var(--ok); } .warn { color: var(--gold); } .ov-c { color: #f06a6a; }
 
-.day{border:1px solid var(--border);border-radius:4px;background:var(--card);
-  cursor:pointer;min-height:80px;transition:border-color .15s,background .15s;overflow:hidden}
-.day:hover{border-color:rgba(201,168,76,.55);background:rgba(33,48,33,.9)}
-.day.we{background:rgba(10,14,10,.5)}
-.day.has{border-color:rgba(201,168,76,.38)}
-.day.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none}
-.day.today{border-color:rgba(94,200,120,.5);box-shadow:0 0 8px rgba(94,200,120,.15)}
-.day-hd{padding:4px 6px;display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.04)}
-.d-num{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700}
-.d-wk{font-size:8px;letter-spacing:.8px;color:var(--khaki);text-transform:uppercase}
-.day.we .d-num{color:#e8a0a0}.day.we .d-wk{color:#a06060}
-.day.today .d-num{color:#7ee8a0}
-.day-body{padding:4px 6px;display:flex;flex-direction:column;gap:2px}
-.dtag{font-size:9px;border-radius:2px;padding:1px 4px;font-weight:600;
-  display:flex;justify-content:space-between;align-items:center;white-space:nowrap}
-.te{background:rgba(26,74,42,.85);color:#7ee8a0}
-.ts{background:rgba(26,42,74,.85);color:#7ab0e8}
-.tv{background:rgba(58,42,16,.85);color:#e8c87a}
-.tc{background:rgba(42,26,58,.85);color:#c07ae8}
-.tp{background:rgba(26,58,58,.85);color:#7ae8e8}
-.tvia{background:rgba(58,26,26,.85);color:#e87a7a}
-.tcod{background:rgba(55,55,55,.6);color:#bbb;font-style:italic}
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; background: var(--panel); }
+.tab { 
+  padding: 10px 18px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent;
+  color: var(--khaki); white-space: nowrap; transition: all 0.2s; user-select: none;
+}
+.tab:hover { color: var(--paper); background: rgba(255,255,255,0.02); }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(201,168,76,0.05); }
+.tab-overview { border-left: 1px solid var(--border); margin-left: auto; color: var(--info); }
+.tab-overview:hover { color: #5c99e6; }
+.tab-overview.active { color: #5c99e6; border-bottom-color: #5c99e6; }
 
-/* ── VISÃO GERAL ── */
-.overview-wrap{flex:1;overflow-y:auto;padding:14px 16px}
-.ov-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;
-  letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
-.ov-table{width:100%;border-collapse:collapse;font-size:11px}
-.ov-table th{padding:6px 10px;text-align:left;font-family:'Barlow Condensed',sans-serif;
-  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--khaki);
-  border-bottom:1px solid var(--border);white-space:nowrap}
-.ov-table td{padding:5px 10px;border-bottom:1px solid rgba(180,150,60,.08);vertical-align:middle}
-.ov-table tr:hover td{background:rgba(201,168,76,.04)}
-.ov-mil-name{font-weight:600;font-size:12px}
-.ov-mil-posto{font-size:10px;color:var(--khaki)}
-.ov-mes-cell{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700}
-.ov-mes-cell .sub{font-size:9px;font-family:'Barlow',sans-serif;font-weight:400;color:var(--khaki);display:block}
-.ov-badge{display:inline-flex;align-items:center;justify-content:center;
-  min-width:48px;padding:2px 6px;border-radius:3px;font-size:12px;font-weight:700;
-  font-family:'Barlow Condensed',sans-serif}
-.badge-ok{background:rgba(74,154,90,.2);color:#5ec878;border:1px solid rgba(74,154,90,.3)}
-.badge-warn{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.25)}
-.badge-low{background:rgba(139,32,32,.2);color:#e05050;border:1px solid rgba(139,32,32,.3)}
-.badge-empty{color:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.07);min-width:48px;text-align:center}
-.ov-total-row td{border-top:1px solid var(--border);font-weight:600;background:rgba(201,168,76,.04)}
+/* CH Bar Overview */
+.ch-bar { 
+  display: flex; gap: 10px; flex-wrap: wrap; padding: 10px 18px;
+  background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; 
+}
+.ch-item { 
+  display: flex; flex-direction: column; gap: 2px; cursor: pointer; padding: 6px 10px; border-radius: 4px;
+  border: 1px solid transparent; background: rgba(255,255,255,0.02); transition: all 0.2s;
+}
+.ch-item:hover { border-color: var(--border-hover); background: rgba(255,255,255,0.05); }
+.ch-item.ch-active { border-color: var(--gold); background: rgba(201,168,76,0.1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+.ch-nome { font-size: 10px; color: var(--khaki); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600;}
+.ch-val { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+.ch-alvo2 { font-size: 9px; color: var(--khaki); }
 
-/* overlay/modal */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;
-  justify-content:center;z-index:100;backdrop-filter:blur(3px)}
-.ov.hidden{display:none}
-.modal{background:var(--panel);border:1px solid var(--gold);border-radius:6px;
-  padding:20px;width:360px;max-width:96vw;display:flex;flex-direction:column;gap:12px;
-  max-height:96vh;overflow-y:auto}
-.modal h2{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;
-  letter-spacing:2px;color:var(--gold)}
-.modal-sub{font-size:10px;color:var(--khaki);margin-top:-6px}
+/* Calendar */
+.cal-wrap { flex: 1; overflow-y: auto; padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; }
+.cal-title { 
+  font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700;
+  letter-spacing: 2px; color: var(--gold); text-transform: uppercase; flex-shrink: 0;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 5px;
+}
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.weekday-hd { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 4px; }
+.wdh { text-align: center; font-size: 11px; letter-spacing: 1px; color: var(--khaki); font-weight: 600; text-transform: uppercase; }
+.wdh.we { color: #cf7c7c; }
 
-.tipo-row{display:flex;gap:4px;flex-wrap:wrap}
-.tbtn{padding:4px 9px;border-radius:3px;font-size:10px;font-weight:700;
-  cursor:pointer;border:1px solid transparent;transition:opacity .15s;opacity:.35}
-.tbtn.sel{opacity:1}
-.tb-exp{background:var(--exp);color:#7ee8a0;border-color:#3a7a5a}
-.tb-sv {background:var(--sv);color:#7ab0e8;border-color:#3a5a8a}
-.tb-sav{background:var(--sav);color:#e8c87a;border-color:#8a6a2a}
-.tb-cch{background:var(--cch);color:#c07ae8;border-color:#6a3a8a}
-.tb-paec{background:var(--paec);color:#7ae8e8;border-color:#2a7a7a}
-.tb-via{background:var(--via);color:#e87a7a;border-color:#8a3a3a}
-.tb-cod{background:rgba(55,55,55,.7);color:#ccc;border-color:#555}
+.day { 
+  border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; background: var(--card);
+  cursor: pointer; min-height: 90px; transition: all 0.2s; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.day:hover { border-color: rgba(201,168,76,0.6); background: rgba(33,48,33,0.95); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+.day.we { background: rgba(0,0,0,0.2); }
+.day.has { border-color: rgba(201,168,76,0.3); }
+.day.empty { background: transparent; border-color: transparent; cursor: default; pointer-events: none; box-shadow: none; }
+.day.today { border-color: var(--ok); box-shadow: 0 0 10px rgba(80,168,98,0.2); }
+.day-hd { 
+  padding: 6px 8px; display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,0,0,0.15); border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.d-num { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; }
+.d-wk { font-size: 9px; letter-spacing: 1px; color: var(--khaki); text-transform: uppercase; font-weight: 600; }
+.day.we .d-num { color: #f09c9c; } .day.we .d-wk { color: #b87474; }
+.day.today .d-num { color: #8ae8a8; }
+.day-body { padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.dtag { 
+  font-size: 10px; border-radius: 3px; padding: 3px 6px; font-weight: 600;
+  display: flex; justify-content: space-between; align-items: center; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2); letter-spacing: 0.3px;
+}
+.te { background: var(--exp); color: #8ae8a8; }
+.ts { background: var(--sv); color: #9cc4f0; }
+.tv { background: var(--sav); color: #f0d69c; }
+.tc { background: var(--cch); color: #d89cf0; }
+.tp { background: var(--paec); color: #9ce8e8; }
+.tvia { background: var(--via); color: #f09c9c; justify-content: center; }
+.tcod { background: rgba(255,255,255,0.1); color: #ddd; font-style: italic; justify-content: center; border: 1px dashed rgba(255,255,255,0.2); }
 
-.campo{display:flex;flex-direction:column;gap:4px}
-.campo-hint{font-size:10px;color:var(--khaki);margin-top:1px}
-.mbtns{display:flex;gap:7px;margin-top:2px}
-.mbtns .btn{padding:8px 14px;font-size:11px}
+/* Overview Table */
+.overview-wrap { flex: 1; overflow-y: auto; padding: 18px 22px; }
+.ov-title { 
+  font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700;
+  letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px;
+}
+.ov-table-container { width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); }
+.ov-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ov-table th { 
+  padding: 10px 12px; text-align: left; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold2);
+  background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.ov-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+.ov-table tr:hover td { background: rgba(201,168,76,0.05); }
+.ov-mil-name { font-weight: 700; font-size: 13px; color: var(--paper); }
+.ov-mil-posto { font-size: 11px; color: var(--khaki); }
+.ov-mes-cell { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; }
+.ov-mes-cell .sub { font-size: 10px; font-family: 'Barlow', sans-serif; font-weight: 500; color: var(--khaki); display: block; margin-top: 2px; }
+.ov-badge { 
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 54px; padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 700;
+  font-family: 'Barlow Condensed', sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.badge-ok { background: rgba(80,168,98,0.2); color: #7ae693; border: 1px solid rgba(80,168,98,0.4); }
+.badge-warn { background: rgba(201,168,76,0.15); color: var(--gold2); border: 1px solid rgba(201,168,76,0.3); }
+.badge-low { background: rgba(156,43,43,0.25); color: #f07575; border: 1px solid rgba(156,43,43,0.4); }
+.badge-empty { color: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.05); box-shadow: none; }
 
-/* modal militar */
-.modal-mil{width:400px}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+/* Modals (Overlays) */
+.ov { 
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center;
+  justify-content: center; z-index: 100; backdrop-filter: blur(4px);
+  opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+}
+.ov.show { opacity: 1; visibility: visible; }
+.modal { 
+  background: var(--panel); border: 1px solid var(--gold); border-radius: 8px;
+  padding: 24px; width: 380px; max-width: 92vw; display: flex; flex-direction: column; gap: 16px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transform: scale(0.95) translateY(10px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.ov.show .modal { transform: scale(1) translateY(0); }
+.modal h2 { 
+  font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700;
+  letter-spacing: 2px; color: var(--gold2); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;
+}
+.modal-sub { font-size: 12px; color: var(--khaki); margin-top: -10px; font-weight: 500; }
 
-/* modal histórico */
-.modal-hist{width:500px}
-.hist-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:4px}
-.hist-table th{padding:5px 8px;text-align:left;font-family:'Barlow Condensed',sans-serif;
-  font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--khaki);
-  border-bottom:1px solid var(--border)}
-.hist-table td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
-.hist-table tr:hover td{background:rgba(201,168,76,.04)}
+.tipo-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tbtn { 
+  padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  cursor: pointer; border: 1px solid transparent; transition: all 0.2s; opacity: 0.4; filter: grayscale(50%);
+}
+.tbtn:hover { opacity: 0.8; transform: translateY(-1px); }
+.tbtn.sel { opacity: 1; filter: grayscale(0%); transform: translateY(0); box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+.tb-exp { background: var(--exp); color: #8ae8a8; border-color: #3b8254; }
+.tb-sv  { background: var(--sv); color: #9cc4f0; border-color: #3c5e8c; }
+.tb-sav { background: var(--sav); color: #f0d69c; border-color: #8c6f3c; }
+.tb-cch { background: var(--cch); color: #d89cf0; border-color: #6e4791; }
+.tb-paec{ background: var(--paec); color: #9ce8e8; border-color: #3c8c8c; }
+.tb-via { background: var(--via); color: #f09c9c; border-color: #8c3c3c; }
+.tb-cod { background: rgba(255,255,255,0.1); color: #ddd; border-color: rgba(255,255,255,0.3); }
 
-/* empty */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  height:100%;gap:10px;color:var(--khaki);font-family:'Barlow Condensed',sans-serif;
-  font-size:15px;letter-spacing:2px;text-transform:uppercase;opacity:.55;text-align:center}
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.campo-hint { font-size: 10px; color: var(--khaki); margin-top: 2px; font-style: italic; }
+.mbtns { display: flex; gap: 10px; margin-top: 8px; pt: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px;}
+.mbtns .btn { padding: 10px 16px; font-size: 13px; }
 
-/* toast */
-.toast{position:fixed;bottom:18px;right:18px;background:var(--green);
-  border:1px solid var(--gold);color:var(--paper);padding:9px 14px;
-  border-radius:4px;font-size:12px;font-weight:600;z-index:300;
-  transform:translateY(55px);opacity:0;transition:transform .22s,opacity .22s;pointer-events:none}
-.toast.show{transform:none;opacity:1}
-.toast.ok{border-color:#5ec878;color:#5ec878}
-.toast.err{border-color:#e05050;color:#e05050}
+/* Modals specific widths */
+.modal-mil { width: 420px; }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-hist { width: 550px; }
 
-/* quick fill */
-.qfill-row{display:flex;gap:4px;flex-wrap:wrap}
-.qfbtn{padding:3px 8px;border-radius:3px;font-size:10px;cursor:pointer;
-  background:rgba(201,168,76,.08);border:1px solid var(--border);color:var(--khaki);
-  transition:all .15s;font-family:'Barlow',sans-serif}
-.qfbtn:hover{background:rgba(201,168,76,.18);color:var(--paper);border-color:var(--gold)}
+/* Hist Table */
+.hist-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.hist-table th { 
+  padding: 6px 10px; text-align: left; font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--gold);
+  border-bottom: 1px solid rgba(201,168,76,0.3); background: rgba(0,0,0,0.2);
+}
+.hist-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.hist-table tr:hover td { background: rgba(255,255,255,0.03); }
 
-@media(max-width:760px){
-  body{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
-  aside{max-height:180px;overflow-x:auto}
+/* Empty states */
+.empty-state { 
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 16px; color: var(--khaki); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.6; text-align: center;
+  padding: 20px;
+}
+
+/* Toasts */
+.toast { 
+  position: fixed; bottom: 24px; right: 24px; background: var(--panel);
+  border-left: 4px solid var(--gold); color: var(--paper); padding: 12px 20px;
+  border-radius: 4px; font-size: 13px; font-weight: 600; z-index: 300;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  transform: translateX(120%); opacity: 0; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast.ok { border-left-color: var(--ok); }
+.toast.err { border-left-color: var(--danger); }
+
+/* Quick Fill Buttons */
+.qfill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.qfbtn { 
+  padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500;
+  background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.3); color: var(--gold2);
+  transition: all 0.2s; font-family: 'Barlow', sans-serif;
+}
+.qfbtn:hover { background: rgba(201,168,76,0.2); color: #fff; border-color: var(--gold); box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+
+@media (max-width: 850px) {
+  body { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; }
+  aside { max-height: 220px; overflow-x: hidden; border-right: none; border-bottom: 2px solid var(--gold); }
+  .week, .weekday-hd { gap: 4px; }
+  .day { min-height: 70px; }
+  .d-num { font-size: 15px; }
+  .dtag { font-size: 9px; padding: 2px 4px; }
+  .cal-wrap, .overview-wrap { padding: 12px; }
+  header { padding: 10px 12px; }
+  .hdr { justify-content: flex-start; margin-top: 8px; width: 100%; }
 }
 </style>
 </head>
@@ -238,16 +370,17 @@ select option{background:#1c2e1c}
 
 <header>
   <div class="shield">BM</div>
-  <div>
+  <div style="flex: 1;">
     <h1>Escala CH — HBM/SM</h1>
-    <p id="hd-sub">Hospital Cel. Izidro · SACM · Selecione o mês e gere o calendário</p>
+    <p id="hd-sub">Hospital Cel. Izidro · SACM · PWA Habilitado</p>
   </div>
   <div class="hdr">
     <div class="save-dot" id="save-dot" title="Dados salvos automaticamente"></div>
+    <button id="btnInstallPwa" class="btn btn-pwa btn-sm">📱 Instalar App</button>
     <button class="btn btn-o btn-sm" onclick="openMilModal()">+ Militar</button>
     <button class="btn btn-b btn-sm" onclick="showOverview()">📊 Geral</button>
     <button class="btn btn-o btn-sm" onclick="exportJSON()">💾 Backup</button>
-    <button class="btn btn-o btn-sm" onclick="document.getElementById('import-input').click()">📂 Importar</button>
+    <button class="btn btn-o btn-sm" onclick="document.getElementById('import-input').click()">📂 Import</button>
     <button class="btn btn-g btn-sm" onclick="exportExcel()">⬇ Excel</button>
     <input type="file" id="import-input" accept=".json" style="display:none" onchange="importJSON(this)">
   </div>
@@ -260,12 +393,12 @@ select option{background:#1c2e1c}
       <div class="r2">
         <div><label>Mês</label>
           <select id="sel-mes">
-            <option value="0">Jan</option><option value="1">Fev</option>
-            <option value="2">Mar</option><option value="3">Abr</option>
-            <option value="4" selected>Mai</option><option value="5">Jun</option>
-            <option value="6">Jul</option><option value="7">Ago</option>
-            <option value="8">Set</option><option value="9">Out</option>
-            <option value="10">Nov</option><option value="11">Dez</option>
+            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+            <option value="2">Março</option><option value="3">Abril</option>
+            <option value="4" selected>Maio</option><option value="5">Junho</option>
+            <option value="6">Julho</option><option value="7">Agosto</option>
+            <option value="8">Setembro</option><option value="9">Outubro</option>
+            <option value="10">Novembro</option><option value="11">Dezembro</option>
           </select>
         </div>
         <div><label>Ano</label>
@@ -280,14 +413,14 @@ select option{background:#1c2e1c}
     <div class="sec-hd open" onclick="toggleSec(this)">👤 Militares <span class="sec-arr">▾</span></div>
     <div class="sec-body">
       <div id="mil-list"></div>
-      <button class="btn btn-o" onclick="openMilModal()">+ Adicionar</button>
+      <button class="btn btn-o" onclick="openMilModal()">+ Adicionar Militar</button>
     </div>
   </div>
 
   <div class="sec">
     <div class="sec-hd" onclick="toggleSec(this)">⚡ Preencher Rápido <span class="sec-arr">▾</span></div>
     <div class="sec-body hidden">
-      <p style="font-size:10px;color:var(--khaki);line-height:1.5">Aplica o mesmo tipo em todos os dias úteis do mês para o militar selecionado.</p>
+      <p style="font-size:11px;color:var(--khaki);line-height:1.4">Aplica o mesmo tipo em todos os dias úteis do mês para o militar selecionado.</p>
       <div class="r2">
         <div>
           <label>Tipo</label>
@@ -303,12 +436,12 @@ select option{background:#1c2e1c}
         </div>
       </div>
       <button class="btn btn-o" onclick="quickFillMes()">⚡ Preencher Dias Úteis</button>
-      <button class="btn btn-r" style="font-size:10px;padding:5px" onclick="clearMes()">🗑 Limpar Mês Inteiro</button>
+      <button class="btn btn-r" style="font-size:11px;padding:6px" onclick="clearMes()">🗑 Limpar Mês Inteiro</button>
     </div>
   </div>
 
   <div class="sec">
-    <div class="sec-hd" onclick="toggleSec(this)">⏱ Horários <span class="sec-arr">▾</span></div>
+    <div class="sec-hd" onclick="toggleSec(this)">⏱ Horários & Regras <span class="sec-arr">▾</span></div>
     <div class="sec-body hidden">
       <div><label>Expediente</label>
         <div class="r2">
@@ -322,16 +455,16 @@ select option{background:#1c2e1c}
           <input type="time" id="cch-fim" value="18:30">
         </div>
       </div>
-      <div><label>Turno de serviço</label>
+      <div><label>Turno padrão de serviço</label>
         <select id="sv-turno">
           <option value="6">6h por turno</option>
           <option value="12" selected>12h (07–19 / 19–07)</option>
         </select>
       </div>
-      <div><label>Sobreaviso: 1h CH a cada</label>
+      <div><label>Sobreaviso (SAV): 1h CH a cada</label>
         <div class="r2">
           <input type="number" id="sav-ratio" value="3" min="1" max="12">
-          <span style="display:flex;align-items:center;font-size:10px;color:var(--khaki)">horas SAV</span>
+          <span style="display:flex;align-items:center;font-size:11px;color:var(--khaki)">horas SAV</span>
         </div>
       </div>
     </div>
@@ -343,10 +476,10 @@ select option{background:#1c2e1c}
       <div><label>Unidade</label>
         <input type="text" id="inp-unidade" value='HBM/SM - "HOSPITAL CEL IZIDRO"'>
       </div>
-      <div><label>Assinatura</label>
+      <div><label>Assinatura (Nome/Posto)</label>
         <input type="text" id="inp-ass" value="Luan Prestes de Lima - 1° Sgt">
       </div>
-      <div><label>Cargo</label>
+      <div><label>Cargo/Função</label>
         <input type="text" id="inp-cargo" value="Aux. Setor de Auditoria e Contas Médicas do HBM/SM">
       </div>
     </div>
@@ -355,193 +488,292 @@ select option{background:#1c2e1c}
 
 <main id="main">
   <div class="empty-state">
-    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    Selecione o mês<br>e clique em Gerar Calendário
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <div>Selecione o mês na barra lateral<br>e clique em <strong style="color:var(--gold2)">Gerar Calendário</strong></div>
   </div>
 </main>
 
 <!-- MODAL DIA -->
-<div class="ov hidden" id="day-ov">
-<div class="modal">
-  <h2 id="dm-title">Dia 01</h2>
-  <div class="modal-sub" id="dm-sub"></div>
+<div class="ov" id="day-ov">
+  <div class="modal">
+    <h2 id="dm-title">Dia 01</h2>
+    <div class="modal-sub" id="dm-sub"></div>
 
-  <div class="campo">
-    <label>Tipo de lançamento</label>
-    <div class="tipo-row">
-      <div class="tbtn tb-exp sel" data-t="exp" onclick="selT(this)">Expediente</div>
-      <div class="tbtn tb-sv"     data-t="sv"   onclick="selT(this)">Serviço</div>
-      <div class="tbtn tb-sav"    data-t="sav"  onclick="selT(this)">Sobreaviso</div>
-      <div class="tbtn tb-cch"    data-t="cch"  onclick="selT(this)">CCH</div>
-      <div class="tbtn tb-paec"   data-t="paec" onclick="selT(this)">PAEC</div>
-      <div class="tbtn tb-via"    data-t="via"  onclick="selT(this)">VIA</div>
-      <div class="tbtn tb-cod"    data-t="cod"  onclick="selT(this)">Código</div>
+    <div class="campo">
+      <label>Tipo de lançamento</label>
+      <div class="tipo-row">
+        <div class="tbtn tb-exp sel" data-t="exp" onclick="selT(this)">Expediente</div>
+        <div class="tbtn tb-sv"      data-t="sv"   onclick="selT(this)">Serviço</div>
+        <div class="tbtn tb-sav"     data-t="sav"  onclick="selT(this)">Sobreaviso</div>
+        <div class="tbtn tb-cch"     data-t="cch"  onclick="selT(this)">CCH</div>
+        <div class="tbtn tb-paec"    data-t="paec" onclick="selT(this)">PAEC</div>
+        <div class="tbtn tb-via"     data-t="via"  onclick="selT(this)">Viagem/Ausência</div>
+        <div class="tbtn tb-cod"     data-t="cod"  onclick="selT(this)">Código Especial</div>
+      </div>
+    </div>
+
+    <div class="campo" id="c-exp">
+      <label>Horas de expediente</label>
+      <input type="number" id="v-exp" min="0" max="24" step="0.5">
+      <div class="qfill-row">
+        <button class="qfbtn" onclick="document.getElementById('v-exp').value=6">6h</button>
+        <button class="qfbtn" onclick="document.getElementById('v-exp').value=5.7">5,7h</button>
+        <button class="qfbtn" onclick="document.getElementById('v-exp').value=hdiff('exp-ini','exp-fim')">Automático (Horários)</button>
+      </div>
+      <span class="campo-hint">Padrão: <span id="exp-pad" style="color:var(--paper)">6h</span> (seg–sex). Fins de semana opcional.</span>
+    </div>
+
+    <div class="campo hidden" id="c-sv">
+      <label>Turno de serviço</label>
+      <select id="v-sv-sel" onchange="svSelChange()">
+        <option value="6">07h–13h · 6h</option>
+        <option value="6b">13h–19h · 6h</option>
+        <option value="12" selected>07h–19h · 12h</option>
+        <option value="6n">19h–01h · 6h</option>
+        <option value="12n">19h–07h · 12h</option>
+        <option value="6nn">01h–07h · 6h</option>
+        <option value="manual">Outro (manual)</option>
+      </select>
+      <input type="number" id="v-sv" min="0" max="24" step="1" placeholder="Horas totais" style="margin-top:6px">
+      <span class="campo-hint">Insira a CH total cumprida no serviço.</span>
+    </div>
+
+    <div class="campo hidden" id="c-sav">
+      <label>Horas de sobreaviso (SAV)</label>
+      <input type="number" id="v-sav" min="0" max="72" step="3" oninput="updSav()">
+      <div class="qfill-row">
+        <button class="qfbtn" onclick="document.getElementById('v-sav').value=12;updSav()">12h</button>
+        <button class="qfbtn" onclick="document.getElementById('v-sav').value=24;updSav()">24h</button>
+        <button class="qfbtn" onclick="document.getElementById('v-sav').value=48;updSav()">48h</button>
+      </div>
+      <span class="campo-hint" id="sav-hint" style="color:var(--gold2)">Razão atual: 1h CH a cada 3h SAV</span>
+    </div>
+
+    <div class="campo hidden" id="c-cch">
+      <label>Horas de complementação (CCH)</label>
+      <input type="number" id="v-cch" min="0" max="24" step="1">
+      <div class="qfill-row">
+        <button class="qfbtn" onclick="document.getElementById('v-cch').value=hdiff('cch-ini','cch-fim')">Auto CCH (Horários)</button>
+        <button class="qfbtn" onclick="document.getElementById('v-cch').value=5">5h</button>
+      </div>
+      <span class="campo-hint">Geralmente seg–sex 13:30–18:30.</span>
+    </div>
+
+    <div class="campo hidden" id="c-paec">
+      <label>Horas de treinamento PAEC</label>
+      <input type="number" id="v-paec" min="0" max="40" step="1">
+      <span class="campo-hint">Horas contabilizadas de instruções/treinamentos.</span>
+    </div>
+
+    <div class="campo hidden" id="c-via">
+      <label>Viagem / Diária</label>
+      <select id="v-via">
+        <option value="VIA">VIA — Viagem a Serviço</option>
+        <option value="DI">DI — Diária</option>
+      </select>
+      <span class="campo-hint" style="color:#f07575; font-weight:600;">⚠ Dia não contabiliza para a CH disponível do mês.</span>
+    </div>
+
+    <div class="campo hidden" id="c-cod">
+      <label>Código / Situação (Afastamentos)</label>
+      <select id="v-cod">
+        <option value="Férias">Férias</option>
+        <option value="LTS">LTS — Licença Saúde</option>
+        <option value="ATT">ATT — Atestado</option>
+        <option value="RSP">RSP</option>
+        <option value="LGL">LGL — Gala (Casamento)</option>
+        <option value="LNJ">LNJ — Nojo (Luto)</option>
+        <option value="FJ">FJ — Falta Justificada</option>
+        <option value="FNJ">FNJ — Falta Não Justificada</option>
+        <option value="F">F — Folga</option>
+        <option value="PRE">PRE — Licença Prêmio</option>
+        <option value="LGE">LGE — Licença Gestante</option>
+        <option value="LFC">LFC — Lic. Saúde Família</option>
+        <option value="LPA">LPA — Lic. Paternidade</option>
+        <option value="LAA">LAA — Aguardando Aposent.</option>
+        <option value="Inst">Inst — Instrução Externa</option>
+        <option value="Curso">Curso</option>
+        <option value="D">D — Dispensa Sv</option>
+        <option value="DM">DM — Dispensa Médica</option>
+      </select>
+      <span class="campo-hint">Será impresso na linha de Serviço na planilha.</span>
+    </div>
+
+    <div class="mbtns">
+      <button class="btn" onclick="saveDay()">✓ Salvar Lançamento</button>
+      <button class="btn btn-r" onclick="clearDay()" style="width:auto;">🗑 Limpar</button>
+      <button class="btn btn-o" onclick="closeDay()" style="width:auto;">Cancelar</button>
     </div>
   </div>
-
-  <div class="campo" id="c-exp">
-    <label>Horas de expediente</label>
-    <input type="number" id="v-exp" min="0" max="24" step="0.5">
-    <div class="qfill-row" style="margin-top:4px">
-      <button class="qfbtn" onclick="document.getElementById('v-exp').value=6">6h</button>
-      <button class="qfbtn" onclick="document.getElementById('v-exp').value=5.7">5,7h</button>
-      <button class="qfbtn" onclick="document.getElementById('v-exp').value=hdiff('exp-ini','exp-fim')">Auto</button>
-    </div>
-    <span class="campo-hint">Padrão: <span id="exp-pad">6h</span> (seg–sex). Fins de semana: opcional.</span>
-  </div>
-
-  <div class="campo hidden" id="c-sv">
-    <label>Turno de serviço</label>
-    <select id="v-sv-sel" onchange="svSelChange()">
-      <option value="6">07h–13h · 6h</option>
-      <option value="6b">13h–19h · 6h</option>
-      <option value="12" selected>07h–19h · 12h</option>
-      <option value="6n">19h–01h · 6h</option>
-      <option value="12n">19h–07h · 12h</option>
-      <option value="6nn">01h–07h · 6h</option>
-      <option value="manual">Outro (manual)</option>
-    </select>
-    <input type="number" id="v-sv" min="0" max="24" step="6" placeholder="horas" style="margin-top:5px">
-    <span class="campo-hint">Turnos de 6h ou 12h</span>
-  </div>
-
-  <div class="campo hidden" id="c-sav">
-    <label>Horas de sobreaviso</label>
-    <input type="number" id="v-sav" min="0" max="72" step="3" oninput="updSav()">
-    <div class="qfill-row" style="margin-top:4px">
-      <button class="qfbtn" onclick="document.getElementById('v-sav').value=12;updSav()">12h</button>
-      <button class="qfbtn" onclick="document.getElementById('v-sav').value=24;updSav()">24h</button>
-      <button class="qfbtn" onclick="document.getElementById('v-sav').value=48;updSav()">48h</button>
-    </div>
-    <span class="campo-hint" id="sav-hint">Razão atual: 1h CH a cada 3h SAV</span>
-  </div>
-
-  <div class="campo hidden" id="c-cch">
-    <label>Horas de complementação</label>
-    <input type="number" id="v-cch" min="0" max="24" step="1">
-    <div class="qfill-row" style="margin-top:4px">
-      <button class="qfbtn" onclick="document.getElementById('v-cch').value=hdiff('cch-ini','cch-fim')">Auto CCH</button>
-      <button class="qfbtn" onclick="document.getElementById('v-cch').value=5">5h</button>
-    </div>
-    <span class="campo-hint">Horas cheias · seg–sex 13:30–18:30 · fds qualquer horário</span>
-  </div>
-
-  <div class="campo hidden" id="c-paec">
-    <label>Horas de treinamento PAEC</label>
-    <input type="number" id="v-paec" min="0" max="40" step="1">
-    <span class="campo-hint">Treinamentos anuais — inserir horas contabilizadas</span>
-  </div>
-
-  <div class="campo hidden" id="c-via">
-    <label>Viagem a serviço</label>
-    <select id="v-via">
-      <option value="VIA">VIA — Viagem a Serviço</option>
-      <option value="DI">DI — Diária</option>
-    </select>
-    <span class="campo-hint" style="color:#e05050">⚠ Dia não contabiliza para CH disponível</span>
-  </div>
-
-  <div class="campo hidden" id="c-cod">
-    <label>Código / Situação</label>
-    <select id="v-cod">
-      <option value="Férias">Férias</option>
-      <option value="LTS">LTS — Licença Saúde</option>
-      <option value="ATT">ATT — Atestado</option>
-      <option value="RSP">RSP</option>
-      <option value="LGL">LGL — Gala</option>
-      <option value="LNJ">LNJ — Nojo / Luto</option>
-      <option value="FJ">FJ — Falta Justificada</option>
-      <option value="FNJ">FNJ — Falta Não Justificada</option>
-      <option value="F">F — Folga</option>
-      <option value="PRE">PRE — Licença Prêmio</option>
-      <option value="LGE">LGE — Licença Gestante</option>
-      <option value="LFC">LFC — Lic. Família</option>
-      <option value="LPA">LPA — Lic. Paternidade</option>
-      <option value="LAA">LAA — Aguardando Aposent.</option>
-      <option value="Inst">Inst — Instrução</option>
-      <option value="Curso">Curso</option>
-      <option value="D">D — Dispensa Sv</option>
-      <option value="DM">DM — Dispensa Médica</option>
-    </select>
-    <span class="campo-hint">Aparece na linha de Serviço. Alguns não contabilizam CH.</span>
-  </div>
-
-  <div class="mbtns">
-    <button class="btn" onclick="saveDay()">✓ Salvar</button>
-    <button class="btn btn-r" onclick="clearDay()" style="width:auto;padding:8px 12px;font-size:11px">🗑 Limpar</button>
-    <button class="btn btn-o" onclick="closeDay()" style="width:auto;padding:8px 12px;font-size:11px">Cancelar</button>
-  </div>
-</div>
 </div>
 
 <!-- MODAL MILITAR -->
-<div class="ov hidden" id="mil-ov">
-<div class="modal modal-mil">
-  <h2 id="mil-ov-title">Novo Militar</h2>
-  <div class="campo"><label>Posto / Graduação</label>
-    <select id="m-posto">
-      <option>Cel PM</option><option>Ten Cel PM</option><option>Major PM</option>
-      <option>Cap PM</option><option>1° Ten PM</option><option>2° Ten PM</option>
-      <option>Asp Of PM</option>
-      <option>1° SGT PM</option><option>2° SGT PM</option><option>3° SGT PM</option>
-      <option>CB PM</option><option selected>Sd PM</option>
-    </select>
-  </div>
-  <div class="frow">
-    <div class="campo"><label>Nome completo</label>
-      <input type="text" id="m-nome" placeholder="NOME SOBRENOME" oninput="this.value=this.value.toUpperCase()">
-    </div>
-    <div class="campo"><label>ID Funcional</label>
-      <input type="text" id="m-id" placeholder="0000000">
-    </div>
-  </div>
-  <div class="frow">
-    <div class="campo"><label>CH alvo mensal (h) — 0 = auto</label>
-      <input type="number" id="m-ch" value="0" min="0">
-    </div>
-    <div class="campo"><label>Jornada semanal</label>
-      <select id="m-jornada">
-        <option value="40">40h/semana</option>
-        <option value="30">30h/semana</option>
-        <option value="20">20h/semana</option>
-        <option value="custom">Personalizada</option>
+<div class="ov" id="mil-ov">
+  <div class="modal modal-mil">
+    <h2 id="mil-ov-title">Novo Militar</h2>
+    <div class="campo"><label>Posto / Graduação</label>
+      <select id="m-posto">
+        <option>Cel PM</option><option>Ten Cel PM</option><option>Major PM</option>
+        <option>Cap PM</option><option>1° Ten PM</option><option>2° Ten PM</option>
+        <option>Asp Of PM</option>
+        <option>1° SGT PM</option><option>2° SGT PM</option><option>3° SGT PM</option>
+        <option>CB PM</option><option selected>Sd PM</option>
       </select>
     </div>
+    <div class="frow">
+      <div class="campo"><label>Nome completo</label>
+        <input type="text" id="m-nome" placeholder="NOME SOBRENOME" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="campo"><label>ID Funcional</label>
+        <input type="text" id="m-id" placeholder="0000000">
+      </div>
+    </div>
+    <div class="frow">
+      <div class="campo"><label>CH Alvo Mensal (h)</label>
+        <input type="number" id="m-ch" value="0" min="0">
+        <span class="campo-hint">0 = Cálculo automático (dias úteis x 5.7h)</span>
+      </div>
+      <div class="campo"><label>Jornada</label>
+        <select id="m-jornada">
+          <option value="40">40h/semana</option>
+          <option value="30">30h/semana</option>
+          <option value="20">20h/semana</option>
+          <option value="custom">Outra</option>
+        </select>
+      </div>
+    </div>
+    <div class="campo"><label>Observações (opcional)</label>
+      <input type="text" id="m-obs" placeholder="Ex: Servidor meio período, cedido...">
+    </div>
+    <div class="mbtns">
+      <button class="btn" id="mil-save-btn" onclick="saveMil()">Adicionar</button>
+      <button class="btn btn-o" onclick="closeMilModal()">Cancelar</button>
+    </div>
   </div>
-  <div class="campo"><label>Observações (opcional)</label>
-    <input type="text" id="m-obs" placeholder="Ex: servidor meio período, cedido, etc.">
-  </div>
-  <div class="mbtns">
-    <button class="btn" id="mil-save-btn" onclick="saveMil()">Adicionar</button>
-    <button class="btn btn-o" onclick="closeMilModal()">Cancelar</button>
-  </div>
-</div>
 </div>
 
 <!-- MODAL HISTÓRICO MILITAR -->
-<div class="ov hidden" id="hist-ov">
-<div class="modal modal-hist">
-  <h2 id="hist-title">Histórico</h2>
-  <div class="modal-sub" id="hist-sub"></div>
-  <div id="hist-body" style="overflow-y:auto;max-height:60vh"></div>
-  <div class="mbtns">
-    <button class="btn btn-o" onclick="document.getElementById('hist-ov').classList.add('hidden')">Fechar</button>
+<div class="ov" id="hist-ov">
+  <div class="modal modal-hist">
+    <h2 id="hist-title">Histórico</h2>
+    <div class="modal-sub" id="hist-sub"></div>
+    <div id="hist-body" style="overflow-y:auto;max-height:60vh; padding-right:4px;"></div>
+    <div class="mbtns">
+      <button class="btn btn-o" onclick="document.getElementById('hist-ov').classList.remove('show')">Fechar</button>
+    </div>
   </div>
-</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- ======================= SCRIPTS PWA & LÓGICA ======================= -->
 <script>
-const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-             'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+// --- PWA INJECTION ---
+// Cria um manifest.json embutido
+const manifestData = {
+  name: "Escala CH - HBM/SM",
+  short_name: "EscalaCH",
+  description: "Gerenciamento de Carga Horária e Escalas HBM/SM",
+  start_url: location.href,
+  display: "standalone",
+  background_color: "#0f160f",
+  theme_color: "#1a2e1a",
+  icons: [
+    {
+      src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192'><rect width='192' height='192' fill='%231a2e1a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='70' font-family='sans-serif' font-weight='bold' fill='%23c9a84c'>CH</text></svg>",
+      sizes: "192x192",
+      type: "image/svg+xml",
+      purpose: "any maskable"
+    },
+    {
+      src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='512' height='512'><rect width='512' height='512' fill='%231a2e1a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='200' font-family='sans-serif' font-weight='bold' fill='%23c9a84c'>CH</text></svg>",
+      sizes: "512x512",
+      type: "image/svg+xml",
+      purpose: "any maskable"
+    }
+  ]
+};
+const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+const manifestURL = URL.createObjectURL(manifestBlob);
+const linkManifest = document.createElement('link');
+linkManifest.rel = 'manifest';
+linkManifest.href = manifestURL;
+document.head.appendChild(linkManifest);
+
+// Service Worker (Para cache e offline)
+const swCode = `
+const CACHE_NAME = 'escala-ch-v4';
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE_NAME).then(cache => {
+    // Tenta fazer cache do html atual e da lib xlsx
+    return cache.addAll([
+      location.href,
+      'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+      'https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap'
+    ]).catch(()=>true); // Ignora erros de CORS em fontes/libs no install
+  }));
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(
+    keys.map(key => { if(key !== CACHE_NAME) return caches.delete(key); })
+  )));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(res => {
+      return res || fetch(e.request).then(fetchRes => {
+        if(e.request.method === 'GET' && e.request.url.startsWith('http')){
+            const cloned = fetchRes.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, cloned));
+        }
+        return fetchRes;
+      }).catch(() => {
+        // Se falhar e for navegação, retorna a raiz cacheada
+        if(e.request.mode === 'navigate') return caches.match(location.href);
+      });
+    })
+  );
+});
+`;
+const swBlob = new Blob([swCode], { type: 'application/javascript' });
+const swURL = URL.createObjectURL(swBlob);
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(swURL).then(() => console.log('PWA Offline Worker Ativo'));
+}
+
+// Lógica de Instalação PWA
+let deferredPrompt;
+const btnInstall = document.getElementById('btnInstallPwa');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btnInstall.style.display = 'inline-flex';
+});
+btnInstall.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') btnInstall.style.display = 'none';
+    deferredPrompt = null;
+  }
+});
+window.addEventListener('appinstalled', () => {
+  btnInstall.style.display = 'none';
+  toast('Aplicativo instalado no seu dispositivo!', 'ok');
+});
+
+
+// ======================= LÓGICA DO APLICATIVO =======================
+
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const MESES_ABR=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const DLS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 const DLC=['D','S','T','Q','Q','S','S'];
 const NAO_CH=['VIA','DI','ATT','RSP','Férias','LTS','LGE','LAA','LIP','PRE','Curso','LPA','D','DM'];
 
-// ── PERSISTÊNCIA ──────────────────────────────
-const STORAGE_KEY='escala_ch_hbm_v2';
+const STORAGE_KEY='escala_ch_hbm_v3_pwa';
 
 function saveToStorage(){
   try{
@@ -560,7 +792,7 @@ function saveToStorage(){
 
 function loadFromStorage(){
   try{
-    const raw=localStorage.getItem(STORAGE_KEY);
+    const raw=localStorage.getItem(STORAGE_KEY) || localStorage.getItem('escala_ch_hbm_v2'); // Migração da v2
     if(!raw)return false;
     const s=JSON.parse(raw);
     if(s.mils)mils=s.mils;
@@ -592,50 +824,52 @@ function setDot(dirty){
   if(d)d.classList.toggle('dirty',dirty);
 }
 
-// ── ESTADO ────────────────────────────────────
+// ESTADO INICIAL
 let mils=[
   {posto:'1° SGT PM',nome:'LUAN PRESTES DE LIMA',      id:'3148963',ch:177,jornada:40,obs:''},
-  {posto:'Sd PM',    nome:'ELISIANE CERON BOLSON',      id:'2909286',ch:85, jornada:20,obs:''},
+  {posto:'Sd PM',    nome:'ELISIANE CERON BOLSON',     id:'2909286',ch:85, jornada:20,obs:''},
   {posto:'Sd PM',    nome:'VIVIANE PEDROZO ALVES NUNES',id:'2915278',ch:177,jornada:40,obs:''},
   {posto:'Sd PM',    nome:'EVERTON RAFAEL GOMES SENA',  id:'2992582',ch:177,jornada:40,obs:''},
 ];
 let dados={};
-let curMes=4,curAno=2026,diasMes=0,dsem=[];
+let curMes=new Date().getMonth(),curAno=new Date().getFullYear(),diasMes=0,dsem=[];
 let curMil=0,curDia=null,curT='exp';
-let editMilIdx=-1; // -1 = novo
-let viewMode='cal'; // 'cal' ou 'overview'
+let editMilIdx=-1; 
+let viewMode='cal'; 
 
-// ── SIDEBAR ────────────────────────────────────
+// Init Dropdowns Date
+document.getElementById('sel-mes').value = curMes;
+document.getElementById('sel-ano').value = curAno;
+
 function toggleSec(h){
   h.classList.toggle('open');
   h.nextElementSibling.classList.toggle('hidden');
 }
 
-// ── MILITARES ──────────────────────────────────
 function renderMils(){
   document.getElementById('mil-list').innerHTML=mils.map((m,i)=>{
     const {tot,alvo}=chInfo(i);
     const pct=alvo?Math.min(100,Math.round(tot/alvo*100)):0;
     const cls=tot>=alvo?'ok':tot>alvo*.85?'warn':'ov-c';
-    const barClr=tot>=alvo?'#5ec878':tot>alvo*.85?'var(--gold)':'#e05050';
+    const barClr=tot>=alvo?'var(--ok)':tot>alvo*.85?'var(--gold)':'#f07575';
     return `<div class="mc ${curMil===i?'active':''}" onclick="selMil(${i})">
       <div class="mc-hd">
         <div style="flex:1;min-width:0">
           <div class="mc-name">${m.nome}</div>
-          <div class="mc-posto">${m.posto} · ${m.id}</div>
+          <div class="mc-posto">${m.posto} · ID: ${m.id}</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
           <span class="mc-ch ${cls}">${tot}h</span>
           <span class="mc-alvo">/ ${alvo}h</span>
         </div>
-        <div style="display:flex;flex-direction:column;gap:3px;margin-left:4px">
-          <span class="mc-del" onclick="event.stopPropagation();editMil(${i})" title="Editar" style="color:var(--khaki);font-size:13px">✎</span>
-          <span class="mc-del" onclick="event.stopPropagation();delMil(${i})">×</span>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-left:6px">
+          <span class="mc-del" onclick="event.stopPropagation();editMil(${i})" title="Editar" style="color:var(--info);font-size:14px">✎</span>
+          <span class="mc-del" onclick="event.stopPropagation();delMil(${i})" title="Excluir">×</span>
         </div>
       </div>
       <div class="mc-bar"><div class="mc-bar-fill" style="width:${pct}%;background:${barClr}"></div></div>
     </div>`;
-  }).join('')||'<div style="font-size:10px;color:var(--khaki);padding:4px">Nenhum militar cadastrado</div>';
+  }).join('')||'<div style="font-size:11px;color:var(--khaki);padding:10px;text-align:center;">Nenhum militar cadastrado</div>';
 }
 
 function selMil(i){
@@ -643,6 +877,9 @@ function selMil(i){
   renderMils();
   if(diasMes&&viewMode==='cal')renderCal();
 }
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
 function openMilModal(){
   editMilIdx=-1;
@@ -652,8 +889,8 @@ function openMilModal(){
   document.getElementById('m-id').value='';
   document.getElementById('m-ch').value='0';
   document.getElementById('m-obs').value='';
-  document.getElementById('mil-ov').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('m-nome').focus(),80);
+  openModal('mil-ov');
+  setTimeout(()=>document.getElementById('m-nome').focus(), 300);
 }
 
 function editMil(i){
@@ -666,14 +903,14 @@ function editMil(i){
   document.getElementById('m-id').value=m.id;
   document.getElementById('m-ch').value=m.ch||0;
   document.getElementById('m-obs').value=m.obs||'';
-  document.getElementById('mil-ov').classList.remove('hidden');
+  openModal('mil-ov');
 }
 
-function closeMilModal(){document.getElementById('mil-ov').classList.add('hidden');editMilIdx=-1;}
+function closeMilModal(){ closeModal('mil-ov'); editMilIdx=-1; }
 
 function saveMil(){
   const nome=document.getElementById('m-nome').value.trim().toUpperCase();
-  if(!nome){toast('Informe o nome','err');return;}
+  if(!nome){toast('Informe o nome do militar.','err');return;}
   const data={
     posto:document.getElementById('m-posto').value,
     nome,
@@ -683,56 +920,48 @@ function saveMil(){
   };
   if(editMilIdx>=0){
     mils[editMilIdx]={...mils[editMilIdx],...data};
-    toast('Militar atualizado!','ok');
+    toast('Cadastro atualizado!','ok');
   } else {
     mils.push(data);
-    toast('Militar adicionado!','ok');
+    toast('Militar adicionado com sucesso!','ok');
   }
-  closeMilModal();
-  markDirty();
-  renderMils();
+  closeMilModal(); markDirty(); renderMils();
   if(diasMes&&viewMode==='cal')renderCal();
 }
 
 function delMil(i){
-  if(!confirm('Remover '+mils[i].nome+'?\n\nTodos os lançamentos deste militar serão removidos.'))return;
+  if(!confirm(`Tem certeza que deseja remover ${mils[i].nome}?\nTodos os seus lançamentos também serão apagados.`))return;
   delete dados[i];
-  // reindexar dados
   const newDados={};
   Object.keys(dados).forEach(k=>{
     const ki=parseInt(k);
     if(ki<i)newDados[ki]=dados[ki];
     else if(ki>i)newDados[ki-1]=dados[ki];
   });
-  dados=newDados;
-  mils.splice(i,1);
+  dados=newDados; mils.splice(i,1);
   if(curMil>=mils.length)curMil=Math.max(0,mils.length-1);
-  markDirty();
-  renderMils();
+  markDirty(); renderMils();
   if(diasMes&&viewMode==='cal')renderCal();
 }
 
-// ── HISTÓRICO ──────────────────────────────────
 function openHist(mi){
   const m=mils[mi];
   document.getElementById('hist-title').textContent=m.nome;
   document.getElementById('hist-sub').textContent=`${m.posto} · ID ${m.id}`;
-  // coletar todos os meses com dados
   const keys=Object.keys(dados[mi]||{});
   const mesesMap={};
   keys.forEach(k=>{
-    // formato: "mes-ano-dia"
     const parts=k.split('-');
     if(parts.length===3){
-      const mesKey=`${parts[1]}-${parts[0]}`; // ano-mes
+      const mesKey=`${parts[1]}-${parts[0]}`; 
       if(!mesesMap[mesKey])mesesMap[mesKey]={mes:parseInt(parts[0]),ano:parseInt(parts[1])};
     }
   });
   const mesesList=Object.values(mesesMap).sort((a,b)=>a.ano!==b.ano?a.ano-b.ano:a.mes-b.mes);
 
   if(!mesesList.length){
-    document.getElementById('hist-body').innerHTML='<p style="color:var(--khaki);font-size:11px;padding:8px 0">Nenhum lançamento registrado para este militar.</p>';
-    document.getElementById('hist-ov').classList.remove('hidden');
+    document.getElementById('hist-body').innerHTML='<div class="empty-state" style="font-size:14px;height:100px;">Sem lançamentos</div>';
+    openModal('hist-ov');
     return;
   }
 
@@ -750,14 +979,14 @@ function openHist(mi){
     totalAcum+=tot;
     const cls=tot>=alvo?'ok':tot>alvo*.85?'warn':'ov-c';
     return `<tr>
-      <td>${MESES_ABR[mes]} ${ano}</td>
-      <td style="text-align:right">${exp}h</td>
-      <td style="text-align:right">${sv}h</td>
-      <td style="text-align:right">${sav}h</td>
-      <td style="text-align:right">${cch}h</td>
-      <td style="text-align:right">${paec}h</td>
-      <td style="text-align:right"><span class="${cls}" style="font-weight:700">${tot}h</span></td>
-      <td style="text-align:right;color:var(--khaki)">${alvo}h</td>
+      <td style="font-weight:600">${MESES_ABR[mes]} ${ano}</td>
+      <td style="text-align:right;color:var(--khaki)">${exp}h</td>
+      <td style="text-align:right;color:var(--khaki)">${sv}h</td>
+      <td style="text-align:right;color:var(--khaki)">${sav}h</td>
+      <td style="text-align:right;color:var(--khaki)">${cch}h</td>
+      <td style="text-align:right;color:var(--khaki)">${paec}h</td>
+      <td style="text-align:right"><span class="${cls}" style="font-weight:800;font-size:14px">${tot}h</span></td>
+      <td style="text-align:right;font-size:10px">${alvo}h</td>
     </tr>`;
   }).join('');
 
@@ -770,14 +999,14 @@ function openHist(mi){
         <th style="text-align:right">Total CH</th><th style="text-align:right">Meta</th>
       </tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr style="border-top:1px solid var(--border)">
-        <td style="font-weight:700;font-family:'Barlow Condensed',sans-serif">TOTAL ACUMULADO</td>
+      <tfoot><tr style="border-top:2px solid var(--border); background:rgba(0,0,0,0.3)">
+        <td style="font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:14px;padding:10px">TOTAL ACUMULADO</td>
         <td colspan="5"></td>
-        <td style="text-align:right;font-weight:700;font-family:'Barlow Condensed',sans-serif;color:var(--gold)">${Math.round(totalAcum*10)/10}h</td>
+        <td style="text-align:right;font-weight:700;font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--gold2)">${Math.round(totalAcum*10)/10}h</td>
         <td></td>
       </tr></tfoot>
     </table>`;
-  document.getElementById('hist-ov').classList.remove('hidden');
+  openModal('hist-ov');
 }
 
 function calcDiasUteis(mes,ano){
@@ -787,48 +1016,44 @@ function calcDiasUteis(mes,ano){
   return u;
 }
 
-// ── PREENCHER RÁPIDO ───────────────────────────
 function quickFillMes(){
-  if(!diasMes){toast('Gere o calendário primeiro','err');return;}
-  if(!mils.length){toast('Nenhum militar selecionado','err');return;}
+  if(!diasMes){toast('Gere o calendário primeiro!','err');return;}
+  if(!mils.length){toast('Nenhum militar selecionado.','err');return;}
   const tipo=document.getElementById('qf-tipo').value;
   const horas=parseFloat(document.getElementById('qf-horas').value)||6;
   let count=0;
   for(let d=1;d<=diasMes;d++){
     const dw=dsem[d-1];
-    if(dw===0||dw===6)continue; // pular fds
+    if(dw===0||dw===6)continue; 
     const dd=getDia(curMil,d)||{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''};
-    if(!dd.via&&!dd.cod){ // não sobrescreve VIA/código
+    if(!dd.via&&!dd.cod){ 
       dd[tipo]=(dd[tipo]||0)+horas;
-      // zerar os outros tipos para não acumular incorretamente
-      // (mantém outros se já existirem)
       setDia(curMil,d,dd);
       count++;
     }
   }
-  markDirty();
-  renderCal();renderMils();
-  toast(`${count} dias preenchidos com ${horas}h de ${tipo}`,'ok');
+  markDirty(); renderCal(); renderMils();
+  toast(`${count} dias preenchidos com ${horas}h de ${tipo.toUpperCase()}`,'ok');
 }
 
 function clearMes(){
   if(!diasMes){toast('Gere o calendário primeiro','err');return;}
-  if(!confirm(`Limpar TODOS os lançamentos de ${MESES[curMes]} ${curAno} para ${mils[curMil]?.nome}?`))return;
-  for(let d=1;d<=diasMes;d++)setDia(curMil,d,{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''});
-  markDirty();renderCal();renderMils();
-  toast('Mês limpo!');
+  if(!confirm(`Atenção: Você vai limpar TODOS os lançamentos de ${MESES[curMes]} de ${curAno} para ${mils[curMil]?.nome}. Confirma?`))return;
+  for(let d=1;d<=diasMes;d++) setDia(curMil,d,{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''});
+  markDirty(); renderCal(); renderMils();
+  toast('Mês esvaziado!');
 }
 
-// ── CALENDÁRIO ─────────────────────────────────
 function buildCal(){
   curMes=+document.getElementById('sel-mes').value;
   curAno=+document.getElementById('sel-ano').value;
   diasMes=new Date(curAno,curMes+1,0).getDate();
   dsem=[];for(let d=1;d<=diasMes;d++)dsem.push(new Date(curAno,curMes,d).getDay());
-  document.getElementById('hd-sub').textContent=
-    `HBM/SM · ${MESES[curMes]} ${curAno} · ${mils.length} militares`;
+  document.getElementById('hd-sub').textContent=`HBM/SM · ${MESES[curMes]} de ${curAno} · ${mils.length} militar(es)`;
   viewMode='cal';
-  renderCal();renderMils();
+  renderCal(); renderMils();
+  // Fecha sidebar se tiver no mobile para mostrar o calendário
+  if (window.innerWidth <= 850) { document.querySelector('.sec-hd.open')?.click(); }
 }
 
 function showOverview(){
@@ -838,10 +1063,9 @@ function showOverview(){
 
 function renderOverview(){
   if(!mils.length){
-    document.getElementById('main').innerHTML='<div class="empty-state">Nenhum militar cadastrado</div>';
+    document.getElementById('main').innerHTML='<div class="empty-state">Nenhum militar cadastrado para visão geral</div>';
     return;
   }
-  // Coletar todos os meses/anos com dados
   const mesSet=new Set();
   mils.forEach((_,mi)=>{
     Object.keys(dados[mi]||{}).forEach(k=>{
@@ -849,7 +1073,6 @@ function renderOverview(){
       if(p.length===3)mesSet.add(`${p[0]}-${p[1]}`);
     });
   });
-  // Se calendário aberto, incluir mês atual
   if(diasMes)mesSet.add(`${curMes}-${curAno}`);
   const mesesList=[...mesSet].map(k=>{const[m,a]=k.split('-');return{mes:+m,ano:+a};})
     .sort((a,b)=>a.ano!==b.ano?a.ano-b.ano:a.mes-b.mes);
@@ -858,7 +1081,7 @@ function renderOverview(){
     document.getElementById('main').innerHTML=`
       <div class="overview-wrap">
         <div class="ov-title">Visão Geral — Controle de CH</div>
-        <p style="color:var(--khaki);font-size:12px">Gere o calendário de pelo menos um mês para ver o controle.</p>
+        <p style="color:var(--khaki);font-size:14px;text-align:center;padding:40px;">Gere o calendário e faça lançamentos para visualizar o quadro geral.</p>
       </div>`;
     return;
   }
@@ -866,7 +1089,7 @@ function renderOverview(){
   const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
 
   const thMeses=mesesList.map(({mes,ano})=>
-    `<th style="text-align:center">${MESES_ABR[mes]}<br><span style="font-size:9px;font-weight:400">${ano}</span></th>`
+    `<th style="text-align:center; min-width:80px;">${MESES_ABR[mes]}<br><span style="font-size:10px;font-weight:500;color:var(--khaki);">${ano}</span></th>`
   ).join('');
 
   const rows=mils.map((m,mi)=>{
@@ -884,7 +1107,6 @@ function renderOverview(){
       return`<td class="ov-mes-cell"><span class="ov-badge ${cls}">${tot}h</span><span class="sub">${alvo}h</span></td>`;
     }).join('');
 
-    // acumulado
     let acum=0;
     Object.keys(dados[mi]||{}).forEach(k=>{
       const dd=dados[mi][k];
@@ -896,43 +1118,43 @@ function renderOverview(){
       <td>
         <div class="ov-mil-name">${m.nome}</div>
         <div class="ov-mil-posto">${m.posto} · ${m.id}</div>
-        ${m.obs?`<div style="font-size:9px;color:var(--khaki);font-style:italic">${m.obs}</div>`:''}
+        ${m.obs?`<div style="font-size:10px;color:var(--gold);font-style:italic;margin-top:4px;">${m.obs}</div>`:''}
       </td>
       ${cells}
       <td style="text-align:center">
-        <span class="ov-badge" style="background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)">${acum}h</span>
+        <span class="ov-badge" style="background:rgba(201,168,76,.15);color:var(--gold2);border:1px solid rgba(201,168,76,.3)">${acum}h</span>
       </td>
       <td style="text-align:center">
-        <button class="qfbtn" onclick="openHist(${mi})">📋 Ver</button>
+        <button class="qfbtn" onclick="openHist(${mi})">📋 Histórico</button>
       </td>
     </tr>`;
   }).join('');
 
   document.getElementById('main').innerHTML=`
     <div class="overview-wrap">
-      <div class="ov-title">Visão Geral — Controle de Carga Horária</div>
-      <div style="overflow-x:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+         <div class="ov-title" style="margin-bottom:0;">Quadro Geral de Horas</div>
+         <button class="btn btn-o" style="width:auto;padding:8px 16px;" onclick="buildCal()">← Retornar ao Calendário</button>
+      </div>
+      <div class="ov-table-container">
         <table class="ov-table">
           <thead>
             <tr>
               <th>Militar</th>
               ${thMeses}
               <th style="text-align:center">Acumulado</th>
-              <th style="text-align:center">Histórico</th>
+              <th style="text-align:center">Detalhes</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
-        <span style="font-size:10px;color:var(--khaki)">Legenda:</span>
-        <span class="ov-badge badge-ok" style="font-size:10px">Meta atingida</span>
-        <span class="ov-badge badge-warn" style="font-size:10px">&gt;85% da meta</span>
-        <span class="ov-badge badge-low" style="font-size:10px">Abaixo da meta</span>
-        <span class="badge-empty ov-badge" style="font-size:10px">Sem lançamentos</span>
-      </div>
-      <div style="margin-top:10px">
-        <button class="btn btn-o" style="width:auto;padding:6px 14px;font-size:11px" onclick="buildCal()">← Voltar ao Calendário</button>
+      <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;background:rgba(0,0,0,0.2);padding:10px 15px;border-radius:6px;align-items:center;">
+        <strong style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;">Legenda:</strong>
+        <span class="ov-badge badge-ok" style="font-size:11px;min-width:auto">Meta Atingida</span>
+        <span class="ov-badge badge-warn" style="font-size:11px;min-width:auto">&gt; 85%</span>
+        <span class="ov-badge badge-low" style="font-size:11px;min-width:auto">Abaixo</span>
+        <span class="badge-empty ov-badge" style="font-size:11px;min-width:auto">Sem Lançamento</span>
       </div>
     </div>`;
 }
@@ -991,7 +1213,7 @@ function renderCal(){
         if(dd.cod) tags+=`<div class="dtag tcod"><span>${dd.cod}</span></div>`;
       }
       return`<div class="day ${isWe?'we':''} ${has?'has':''} ${isToday?'today':''}" onclick="openDay(${d})">
-        <div class="day-hd"><span class="d-num">${d}</span><span class="d-wk">${DLS[ds].substring(0,3)}</span></div>
+        <div class="day-hd"><span class="d-num">${d}</span><span class="d-wk">${DLS[ds]}</span></div>
         <div class="day-body">${tags}</div>
       </div>`;
     }).join('');
@@ -1000,38 +1222,38 @@ function renderCal(){
 
   const {tot,alvo}=chInfo(curMil);
   const pct=alvo?Math.min(100,Math.round(tot/alvo*100)):0;
-  const barClr=tot>=alvo?'#5ec878':tot>alvo*.85?'var(--gold)':'#e05050';
+  const barClr=tot>=alvo?'var(--ok)':tot>alvo*.85?'var(--gold)':'#f07575';
 
   document.getElementById('main').innerHTML=`
     <div class="tabs">
       ${tabs}
-      <div class="tab tab-overview" onclick="showOverview()">📊 Geral</div>
+      <div class="tab tab-overview" onclick="showOverview()">📊 Visão Geral</div>
     </div>
     <div class="ch-bar">${chb}</div>
     <div class="cal-wrap">
       <div class="cal-title">
         ${mil.nome} — ${MESES[curMes]} ${curAno}
-        <button class="qfbtn" style="margin-left:auto" onclick="openHist(${curMil})">📋 Histórico</button>
+        <button class="qfbtn" style="margin-left:auto; padding: 6px 12px; font-size:12px;" onclick="openHist(${curMil})">📋 Abrir Histórico</button>
       </div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
-        <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px">
-          <div style="height:100%;width:${pct}%;background:${barClr};border-radius:2px;transition:width .4s"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px; background:rgba(0,0,0,0.2); padding: 8px 12px; border-radius:6px;">
+        <span style="font-size:11px;color:var(--khaki);white-space:nowrap;font-weight:600;">PROGRESSO CH:</span>
+        <div style="flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:4px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.5);">
+          <div style="height:100%;width:${pct}%;background:${barClr};border-radius:4px;transition:width .5s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:0 0 8px ${barClr}80;"></div>
         </div>
-        <span style="font-size:10px;color:var(--khaki);white-space:nowrap">${pct}% · ${tot}h / ${alvo}h</span>
+        <span style="font-size:14px;color:var(--paper);white-space:nowrap;font-family:'Barlow Condensed',sans-serif;font-weight:700;">${tot}h / ${alvo}h <span style="font-size:11px;color:var(--khaki);font-weight:normal;font-family:'Barlow',sans-serif;">(${pct}%)</span></span>
       </div>
       <div class="weekday-hd">${wkHd}</div>
       ${calHtml}
     </div>`;
 }
 
-// ── MODAL DIA ──────────────────────────────────
 function openDay(d){
   curDia=d;
   const ds=dsem[d-1],mil=mils[curMil];
   const dd=getDia(curMil,d);
   const expH=hdiff('exp-ini','exp-fim');
-  document.getElementById('dm-title').textContent=`${DLS[ds]}, ${d} — ${mil.nome.split(' ')[0]}`;
-  document.getElementById('dm-sub').textContent=`${MESES[curMes]} ${curAno} · ${mil.posto}`;
+  document.getElementById('dm-title').textContent=`${DLS[ds]}, ${d} de ${MESES[curMes]}`;
+  document.getElementById('dm-sub').textContent=`${mil.nome} · ${mil.posto}`;
   document.getElementById('exp-pad').textContent=expH+'h';
   document.getElementById('v-exp').value= dd?.exp!==undefined?dd.exp:(ds!==0&&ds!==6?expH:'');
   document.getElementById('v-sv').value = dd?.sv||'';
@@ -1042,10 +1264,11 @@ function openDay(d){
   if(dd?.cod)document.getElementById('v-cod').value=dd.cod;
   updSav();
   selTStr('exp');
-  document.getElementById('day-ov').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('v-exp').focus(),80);
+  openModal('day-ov');
+  setTimeout(()=>document.getElementById('v-exp').focus(), 300);
 }
-function closeDay(){document.getElementById('day-ov').classList.add('hidden');curDia=null;}
+
+function closeDay(){ closeModal('day-ov'); curDia=null;}
 
 function selT(btn){selTStr(btn.dataset.t);}
 function selTStr(t){
@@ -1055,14 +1278,14 @@ function selTStr(t){
     document.getElementById('c-'+c).classList.toggle('hidden',c!==t);
   });
   const fm={exp:'v-exp',sv:'v-sv',sav:'v-sav',cch:'v-cch',paec:'v-paec'};
-  if(fm[t])setTimeout(()=>document.getElementById(fm[t]).focus(),50);
+  if(fm[t])setTimeout(()=>document.getElementById(fm[t]).focus(),100);
 }
 
 function updSav(){
   const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
   const h=parseFloat(document.getElementById('v-sav').value)||0;
   document.getElementById('sav-hint').textContent=
-    h?`${h}h SAV = ${Math.round(h/ratio*10)/10}h na CH`:`1h CH a cada ${ratio}h de sobreaviso`;
+    h?`${h}h na escala representam ${Math.round(h/ratio*10)/10}h de CH válida (1/${ratio}).`:`1h CH a cada ${ratio}h de sobreaviso`;
 }
 
 function svSelChange(){
@@ -1084,21 +1307,19 @@ function saveDay(){
   };
   setDia(curMil,curDia,dd);
   markDirty();
-  closeDay();renderCal();renderMils();
+  closeDay(); renderCal(); renderMils();
 }
 
 function clearDay(){
   if(!curDia)return;
   setDia(curMil,curDia,{exp:0,sv:0,sav:0,cch:0,paec:0,via:'',cod:''});
   markDirty();
-  closeDay();renderCal();renderMils();
+  closeDay(); renderCal(); renderMils();
 }
 
-// ── DADOS ──────────────────────────────────────
 function getDia(mi,d){return dados[mi]?.[`${curMes}-${curAno}-${d}`];}
 function setDia(mi,d,v){if(!dados[mi])dados[mi]={};dados[mi][`${curMes}-${curAno}-${d}`]=v;}
 
-// ── CH ─────────────────────────────────────────
 function hdiff(a,b){
   const [ha,ma]=document.getElementById(a).value.split(':').map(Number);
   const [hb,mb]=document.getElementById(b).value.split(':').map(Number);
@@ -1124,10 +1345,10 @@ function chInfo(mi){
   return{tot,alvo,disp};
 }
 
-// ── BACKUP / IMPORTAR ──────────────────────────
+// BACKUP / EXPORTAÇÃO JSON
 function exportJSON(){
   const state={
-    version:2,
+    version:3,
     exportedAt:new Date().toISOString(),
     mils,dados,
     config:{
@@ -1140,7 +1361,7 @@ function exportJSON(){
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=`escala_ch_backup_${new Date().toISOString().slice(0,10)}.json`;
   a.click();URL.revokeObjectURL(url);
-  toast('Backup exportado!','ok');
+  toast('Backup exportado com sucesso!','ok');
 }
 
 function importJSON(input){
@@ -1149,27 +1370,28 @@ function importJSON(input){
   reader.onload=e=>{
     try{
       const s=JSON.parse(e.target.result);
-      if(!s.mils||!s.dados)throw new Error('Formato inválido');
-      if(!confirm(`Importar dados de ${s.exportedAt||'data desconhecida'}?\n\nISTO SUBSTITUIRÁ todos os dados atuais.`))return;
+      if(!s.mils||!s.dados)throw new Error('Arquivo inválido ou corrompido.');
+      if(!confirm(`Atenção: Importar dados substituirá TUDO o que você tem atualmente.\nDeseja prosseguir com a importação de backup de ${s.exportedAt.slice(0,10)}?`))return;
       mils=s.mils;dados=s.dados;
       if(s.config){
         document.getElementById('inp-unidade').value=s.config.unidade||'';
         document.getElementById('inp-ass').value=s.config.ass||'';
         document.getElementById('inp-cargo').value=s.config.cargo||'';
       }
-      saveToStorage();
-      renderMils();
+      saveToStorage(); renderMils();
       if(diasMes)renderCal();
-      toast('Dados importados com sucesso!','ok');
-    }catch(err){toast('Erro ao importar: '+err.message,'err');}
+      toast('Dados importados e restaurados!','ok');
+    }catch(err){toast('Falha ao importar: '+err.message,'err');}
   };
   reader.readAsText(file);
   input.value='';
 }
 
-// ── EXPORT EXCEL ───────────────────────────────
+// EXCEL EXPORT
 function exportExcel(){
-  if(!diasMes){toast('Gere o calendário primeiro','err');return;}
+  if(!diasMes){toast('Gere um calendário antes de exportar.','err');return;}
+  if(typeof XLSX === 'undefined'){toast('Aguarde o carregamento do módulo Excel...','warn');return;}
+  
   const ratio=parseFloat(document.getElementById('sav-ratio').value)||3;
   const nm=MESES[curMes].toUpperCase();
   const unid=document.getElementById('inp-unidade').value;
@@ -1225,7 +1447,7 @@ function exportExcel(){
     for(let d=1;d<=diasMes;d++)vr.push(getDia(mi,d)?.via||'');
     vr.push('','','');ws.push(vr);
 
-    const tr=['','','','Total'];
+    const tr=['','','','Total CH'];
     for(let d=1;d<=diasMes;d++)tr.push('');
     tr.push(tot,'','');ws.push(tr);
     ws.push([]);
@@ -1240,40 +1462,43 @@ function exportExcel(){
   ws.push(['','D=Dispensa SV - C= Curso - Exp=Expediente Adm - SAV=Sobreaviso','','','','','','','','','','','','','','',cargo]);
 
   const sheet=XLSX.utils.aoa_to_sheet(ws);
-  const cols=[{wch:14},{wch:28},{wch:11},{wch:11}];
-  for(let i=0;i<diasMes;i++)cols.push({wch:4});
-  cols.push({wch:7},{wch:5},{wch:7});
+  const cols=[{wch:14},{wch:28},{wch:11},{wch:12}];
+  for(let i=0;i<diasMes;i++)cols.push({wch:4.5});
+  cols.push({wch:8},{wch:6},{wch:8});
   sheet['!cols']=cols;
-  XLSX.utils.book_append_sheet(wb,sheet,MESES[curMes].substring(0,3));
+  XLSX.utils.book_append_sheet(wb,sheet,MESES_ABR[curMes]);
   XLSX.writeFile(wb,`Escala_CH_${nm}_${curAno}.xlsx`);
-  toast('Exportado com sucesso!','ok');
+  toast('Planilha exportada com sucesso!','ok');
 }
 
-// ── UTILITÁRIOS ────────────────────────────────
 function toast(msg,t=''){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className='toast show '+(t||'');
-  clearTimeout(el._t);el._t=setTimeout(()=>{el.className='toast';},3000);
+  clearTimeout(el._t);el._t=setTimeout(()=>{el.classList.remove('show');},3500);
 }
 
-// ── TECLADO ────────────────────────────────────
+// TECLADO E EVENTOS GERAIS
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
-    document.getElementById('day-ov').classList.add('hidden');
-    document.getElementById('mil-ov').classList.add('hidden');
-    document.getElementById('hist-ov').classList.add('hidden');
+    closeModal('day-ov');
+    closeModal('mil-ov');
+    closeModal('hist-ov');
   }
-  if(e.key==='Enter'&&!document.getElementById('day-ov').classList.contains('hidden'))saveDay();
+  if(e.key==='Enter' && document.getElementById('day-ov').classList.contains('show')){
+    saveDay();
+  }
 });
 document.getElementById('m-nome').addEventListener('keydown',e=>{if(e.key==='Enter')saveMil();});
 
-// Autosave ao sair da página
+// Autosave principal
 window.addEventListener('beforeunload',()=>{if(_dirty)saveToStorage();});
 
-// ── INICIALIZAÇÃO ──────────────────────────────
-const loaded=loadFromStorage();
-if(loaded)toast('Dados restaurados ✓','ok');
+// INICIALIZAÇÃO
+if(loadFromStorage()){
+  toast('Dados restaurados localmente ✓', 'ok');
+}
 renderMils();
+
 </script>
 </body>
 </html>
